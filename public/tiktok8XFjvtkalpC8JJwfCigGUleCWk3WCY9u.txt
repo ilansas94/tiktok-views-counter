@@ -1,0 +1,13 @@
+# TODO: Replace this entire file content with the exact token text from TikTok Developer Portal
+# 
+# Instructions:
+# 1. Go to your TikTok Developer Portal
+# 2. Download the verification token file
+# 3. Copy the EXACT contents from that file
+# 4. Replace everything below this line with those contents
+# 5. Save the file
+# 6. Commit and deploy
+# 7. Verify the URL: https://tiktok-views-counter.vercel.app/tiktok8XFjvtkalpC8JJwfCigGUleCWk3WCY9u.txt
+# 8. Go back to TikTok Developer Portal and click "Verify"
+
+<<<PASTE_TIKTOK_TOKEN_CONTENT_HERE>>>

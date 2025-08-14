@@ -118,6 +118,25 @@ Open [http://localhost:3000](http://localhost:3000) in your browser.
 2. Add environment variables in Vercel dashboard
 3. Deploy automatically on push to main branch
 
+## 🔐 TikTok App Verification
+
+### URL-Prefix Verification
+
+To verify your TikTok app, you need to host a verification file:
+
+**File Location**: `/public/tiktok8XFjvtkalpC8JJwfCigGUleCWk3WCY9u.txt`
+
+**Verification URL**: `https://tiktok-views-counter.vercel.app/tiktok8XFjvtkalpC8JJwfCigGUleCWk3WCY9u.txt`
+
+**Setup Instructions**:
+1. The verification file is already created in the public directory
+2. Replace the placeholder content with the exact token text from TikTok Developer Portal
+3. Commit and deploy the changes
+4. Verify the URL is accessible and shows the token content
+5. Go back to TikTok Developer Portal and click "Verify"
+
+**Note**: The file is served as a static asset from the public directory, so no additional configuration is needed.
+
 ### Manual Deployment
 
 ```bash
