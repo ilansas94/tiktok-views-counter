@@ -52,6 +52,7 @@ async function exchangeCodeForToken(code: string): Promise<string | null> {
 
     const data = await response.json()
     console.log('Token exchange successful, access token received')
+    console.log('Token response data:', data)
     return data.access_token
   } catch (error) {
     console.error('Error exchanging code for token:', error)
@@ -128,6 +129,8 @@ function CallbackContent() {
 
       // Exchange code for access token
       const accessToken = await exchangeCodeForToken(code)
+      
+      console.log('Access token value:', accessToken ? accessToken.substring(0, 20) + '...' : 'NULL')
       
       if (accessToken) {
         console.log('Access token received, attempting to fetch videos...')
