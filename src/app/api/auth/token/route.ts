@@ -62,6 +62,7 @@ export async function POST(request: NextRequest) {
 
     const data = await response.json()
     console.log('Token exchange successful, access token received')
+    console.log('TikTok API response data:', data)
     
     return NextResponse.json({ 
       access_token: data.access_token,
