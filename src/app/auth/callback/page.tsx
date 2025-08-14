@@ -1,6 +1,7 @@
 'use client'
 
 import { Suspense, useEffect, useState } from 'react'
+import { useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { getCodeVerifier } from '@/lib/pkce'
 
@@ -85,7 +86,8 @@ async function fetchVideos(accessToken: string): Promise<{ totalViews: number; v
   }
 }
 
-function CallbackContent({ searchParams }: { searchParams: { [key: string]: string | string[] | undefined } }) {
+function CallbackContent() {
+  const searchParams = useSearchParams()
   const [totalViews, setTotalViews] = useState(12345678) // Sample data fallback
   const [videoCount, setVideoCount] = useState(42) // Sample data fallback
   const [isLiveData, setIsLiveData] = useState(false)
@@ -95,9 +97,9 @@ function CallbackContent({ searchParams }: { searchParams: { [key: string]: stri
 
   useEffect(() => {
     async function processCallback() {
-      const code = decodeURIComponent(searchParams.code as string || '')
-      const error = searchParams.error as string
-      const errorDescription = searchParams.error_description as string
+      const code = decodeURIComponent(searchParams.get('code') || '')
+      const error = searchParams.get('error') || ''
+      const errorDescription = searchParams.get('error_description') || ''
 
       if (error) {
         setErrorMessage(errorDescription || 'Authentication failed. Please try again.')
@@ -228,11 +230,7 @@ function CallbackContent({ searchParams }: { searchParams: { [key: string]: stri
   )
 }
 
-export default function CallbackPage({
-  searchParams,
-}: {
-  searchParams: { [key: string]: string | string[] | undefined }
-}) {
+export default function CallbackPage() {
   return (
     <Suspense fallback={
       <div className="min-h-screen flex items-center justify-center bg-tiktok-dark">
@@ -242,7 +240,7 @@ export default function CallbackPage({
         </div>
       </div>
     }>
-      <CallbackContent searchParams={searchParams} />
+      <CallbackContent />
     </Suspense>
   )
 }
