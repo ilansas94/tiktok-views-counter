@@ -1,21 +1,25 @@
-# Functional & Compliance Requirements
+# Requirements
 
-## Scopes
-- Display API scopes: `user.info.basic, video.list`.
+## Core Functionality
+- TikTok OAuth login
+- Display total views across all user videos
+- Responsive design
+- Fast loading
 
-## UI/Copy Requirements
-- CTA: “Login with TikTok”.
-- “Sample data” label visible until approval.
-- Footer links to /privacy and /terms.
+## Technical Requirements
+- Next.js framework
+- TypeScript
+- Tailwind CSS
+- Vercel deployment
+- TikTok API integration
 
-## Accessibility
-- Color contrast ≥ 4.5:1 for text.
-- Keyboard navigable.
+## User Experience
+- Simple, clean interface
+- Clear call-to-action
+- Mobile-friendly
+- Accessible design
 
-## Performance
-- Largest Contentful Paint < 2.5s on 3G.
-- Minified assets; no heavy libs.
-
-## Forbidden
-- No scraping, no unofficial endpoints.
-- No storing tokens or user data beyond session without explicit notice.
+## Security
+- OAuth 2.0 flow
+- No data storage
+- Secure token handling
