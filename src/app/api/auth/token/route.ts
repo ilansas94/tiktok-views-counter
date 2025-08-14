@@ -46,6 +46,8 @@ export async function POST(request: NextRequest) {
       body: JSON.stringify(tokenRequestBody)
     })
 
+    console.log('TikTok API response status:', response.status, response.statusText)
+
     if (!response.ok) {
       const errorText = await response.text()
       console.error('Token exchange failed:', {
@@ -63,6 +65,15 @@ export async function POST(request: NextRequest) {
     const data = await response.json()
     console.log('Token exchange successful, access token received')
     console.log('TikTok API response data:', data)
+    
+    // Check if the response is empty or missing access_token
+    if (!data || !data.access_token) {
+      console.error('Token response is empty or missing access_token:', data)
+      return NextResponse.json({ 
+        error: 'Invalid token response from TikTok',
+        details: 'Response is empty or missing access_token'
+      }, { status: 500 })
+    }
     
     return NextResponse.json({ 
       access_token: data.access_token,
