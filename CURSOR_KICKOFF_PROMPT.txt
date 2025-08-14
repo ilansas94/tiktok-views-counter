@@ -1,0 +1,22 @@
+You are Cursor working as a senior full-stack engineer. Read all files in ./docs and implement **Phase 0** ONLY from docs/TASKS.md without writing any scraping or protected API calls.
+
+CONSTRAINTS:
+- Framework: choose Next.js or Express+EJS; pick the simplest path to ship quickly.
+- Create the site pages: / (Home), /privacy, /terms.
+- Add a visible “Login with TikTok” button linking to /auth/login.
+- Implement /auth/login to build the official TikTok authorize URL from env vars (APP_BASE_URL, TIKTOK_CLIENT_KEY, TIKTOK_SCOPES). If envs missing, still render a disabled state or placeholder URL and do not crash.
+- Implement /auth/callback that reads ?code or ?error and shows a friendly message (no token exchange).
+- On Home, show a “Total Views” card with a static **Sample** number (e.g., 12,345,678) and a small badge “Sample Data”.
+- Add footer links to /privacy and /terms.
+- Add .env support and an example .env.local template with APP_BASE_URL=http://localhost:3000 and TIKTOK_SCOPES="user.info.basic,video.list".
+- Add minimal styles and mobile responsiveness.
+- Provide a one-line deploy command for Vercel or Netlify and perform the deployment (generate config if needed). Output the public URL at the end.
+
+ACCEPTANCE CRITERIA:
+- Running locally shows Home, Privacy, Terms.
+- “Login with TikTok” button exists; /auth/login and /auth/callback routes render without errors.
+- Home shows a Total Views card with Sample number and a “Sample Data” label.
+- No calls to protected TikTok endpoints are made.
+- The project builds and deploys to a public preview URL. Print that URL.
+
+Once finished, summarize what you built, where each page lives, and the exact next steps for Phase 1.

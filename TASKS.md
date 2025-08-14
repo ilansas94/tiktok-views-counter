@@ -1,14 +1,14 @@
 # Development Tasks
 
 ## Phase 0: Foundation
-- [x] Set up Next.js project
-- [x] Configure TypeScript
-- [x] Set up Tailwind CSS
-- [x] Create basic layout
-- [x] Add Header and Footer components
-- [x] Create home page
-- [x] Add privacy and terms pages
-- [x] Set up routing structure
+- [ ] Set up Next.js project
+- [ ] Configure TypeScript
+- [ ] Set up Tailwind CSS
+- [ ] Create basic layout
+- [ ] Add Header and Footer components
+- [ ] Create home page
+- [ ] Add privacy and terms pages
+- [ ] Set up routing structure
 
 ## Phase 1: OAuth Implementation
 - [ ] Create login page

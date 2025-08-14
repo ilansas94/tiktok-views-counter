@@ -1,128 +1,173 @@
-# TikTok Views Counter
+# TikTok Total Views Counter
 
-A web application that allows TikTok creators to view the total number of views across all their videos by connecting their TikTok account through official OAuth.
+A modern web application that allows TikTok creators to view the total number of views across all their videos by connecting their TikTok account through official OAuth.
 
-## Features
+## 🚀 Features
 
-- **OAuth Integration**: Secure TikTok account connection using official OAuth
-- **Total Views Display**: Shows combined view count across all videos
-- **Sample Data Mode**: Demonstrates functionality while awaiting API approval
-- **Responsive Design**: Works seamlessly on desktop and mobile devices
-- **Privacy Focused**: No permanent storage of user data
+- **Secure OAuth Integration**: Official TikTok OAuth 2.0 flow
+- **Total Views Calculation**: Sum up views across all your videos
+- **Modern UI**: Dark theme with TikTok brand colors
+- **Responsive Design**: Works on desktop and mobile
+- **Privacy-First**: No data stored on servers
+- **Sample Data**: Preview functionality during development
 
-## Tech Stack
+## 🛠️ Tech Stack
 
-- **Framework**: Next.js 15 with App Router
+- **Framework**: Next.js 14 (App Router)
 - **Language**: TypeScript
 - **Styling**: Tailwind CSS
-- **Deployment**: Vercel
+- **Authentication**: TikTok OAuth 2.0
+- **Deployment**: Vercel (recommended)
 
-## Getting Started
-
-### Prerequisites
+## 📋 Prerequisites
 
 - Node.js 18+ 
 - npm or yarn
+- TikTok Developer Account (for OAuth credentials)
 
-### Installation
+## 🚀 Quick Start
 
-1. Clone the repository:
+### 1. Clone the Repository
+
 ```bash
-git clone <repository-url>
+git clone https://github.com/ilansas94/tiktok-views-counter.git
 cd tiktok-views-counter
 ```
 
-2. Install dependencies:
+### 2. Install Dependencies
+
 ```bash
 npm install
 ```
 
-3. Set up environment variables:
+### 3. Environment Setup
+
+Copy the example environment file:
+
 ```bash
-cp .env.local.example .env.local
+cp env.example .env.local
 ```
 
-Edit `.env.local` with your TikTok OAuth credentials:
-```
+Edit `.env.local` and add your TikTok OAuth credentials:
+
+```env
+# TikTok OAuth Configuration
+TIKTOK_CLIENT_KEY=your_tiktok_client_key_here
+TIKTOK_CLIENT_SECRET=your_tiktok_client_secret_here
+
+# App Configuration
+APP_BASE_URL=http://localhost:3000
+
+# TikTok API Scopes
+TIKTOK_SCOPES=user.info.basic,video.list
+
+# Next.js Public Variables
 NEXT_PUBLIC_APP_BASE_URL=http://localhost:3000
 NEXT_PUBLIC_TIKTOK_CLIENT_KEY=your_tiktok_client_key_here
 NEXT_PUBLIC_TIKTOK_SCOPES=user.info.basic,video.list
 ```
 
-4. Run the development server:
+### 4. Get TikTok OAuth Credentials
+
+1. Go to [TikTok for Developers](https://developers.tiktok.com/)
+2. Create a new app
+3. Add OAuth redirect URL: `http://localhost:3000/auth/callback`
+4. Copy your Client Key and Client Secret
+
+### 5. Run Development Server
+
 ```bash
 npm run dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) to view the application.
+Open [http://localhost:3000](http://localhost:3000) in your browser.
 
-## Environment Variables
+## 📱 Pages
 
-| Variable | Description | Required |
-|----------|-------------|----------|
-| `NEXT_PUBLIC_APP_BASE_URL` | Your application's base URL | Yes |
-| `NEXT_PUBLIC_TIKTOK_CLIENT_KEY` | TikTok OAuth client key | Yes |
-| `NEXT_PUBLIC_TIKTOK_SCOPES` | TikTok OAuth scopes | Yes |
+- **Home** (`/`): Hero section, CTA, sample data preview, "How it works"
+- **Login** (`/auth/login`): TikTok OAuth login page
+- **Callback** (`/auth/callback`): OAuth callback handler
+- **Privacy** (`/privacy`): Privacy policy
+- **Terms** (`/terms`): Terms of service
 
-## Project Structure
+## 🎨 Design System
 
+### Colors
+- **Primary**: TikTok Cyan (#00F2EA)
+- **Secondary**: TikTok Pink (#FF0050)
+- **Dark**: TikTok Dark (#161823)
+- **Background**: Dark theme with gradients
+
+### Typography
+- **Font**: Inter (Google Fonts)
+- **Weights**: 300, 400, 500, 600, 700
+
+### Components
+- Responsive header with navigation
+- Gradient buttons with hover effects
+- Card components with shadows
+- Smooth animations and transitions
+
+## 🔒 Security & Privacy
+
+- **No Data Storage**: Access tokens used in memory only
+- **Minimal Scopes**: Only requests necessary permissions
+- **Secure OAuth**: Official TikTok OAuth 2.0 flow
+- **HTTPS Only**: All production deployments use HTTPS
+
+## 🚀 Deployment
+
+### Vercel (Recommended)
+
+1. Connect your GitHub repository to Vercel
+2. Add environment variables in Vercel dashboard
+3. Deploy automatically on push to main branch
+
+### Manual Deployment
+
+```bash
+npm run build
+npm start
 ```
-app/                      # Next.js App Router pages
-├── auth/                # OAuth routes
-│   ├── login/           # Login page
-│   └── callback/        # OAuth callback
-├── privacy/             # Privacy policy
-├── terms/               # Terms of service
-├── layout.tsx           # Root layout
-├── page.tsx             # Home page
-└── globals.css          # Global styles
-components/              # Reusable components
-├── Header.tsx           # Site header
-└── Footer.tsx           # Site footer
-public/
-├── favicon.png         # App icon
-└── Assets/             # Original assets
-```
 
-## Development Phases
+## 📊 Phase Development
 
 ### Phase 0 (Current)
-- ✅ Basic application structure
-- ✅ OAuth UI flow (stub)
-- ✅ Sample data display
-- ✅ Legal pages (Privacy, Terms)
+- ✅ Modern UI with sample data
+- ✅ OAuth flow stubs
+- ✅ Legal pages
 - ✅ Responsive design
 
 ### Phase 1 (Pre-approval)
-- 🔄 Enhanced UI/UX
-- 🔄 SEO optimization
-- 🔄 Mobile QA
+- 🔄 OAuth implementation
+- 🔄 Token exchange
+- 🔄 Error handling
 
 ### Phase 2 (Post-approval)
 - ⏳ Real TikTok API integration
-- ⏳ Token exchange
-- ⏳ View calculation
-- ⏳ Live data display
+- ⏳ Video list fetching
+- ⏳ View count calculation
 
-## Deployment
-
-The application is configured for deployment on Vercel:
-
-1. Connect your repository to Vercel
-2. Set environment variables in Vercel dashboard
-3. Deploy automatically on push to main branch
-
-## Contributing
+## 🤝 Contributing
 
 1. Fork the repository
 2. Create a feature branch
 3. Make your changes
-4. Submit a pull request
+4. Add tests if applicable
+5. Submit a pull request
 
-## License
+## 📄 License
 
-This project is licensed under the MIT License.
+This project is licensed under the ISC License.
 
-## Privacy
+## ⚠️ Disclaimer
 
-This application respects user privacy and does not store personal data permanently. All TikTok data access is performed through official APIs with user consent.
+This tool is not affiliated with TikTok Inc. TikTok is a registered trademark of ByteDance Ltd.
+
+## 📞 Support
+
+For support, email support@yourdomain.com or create an issue on GitHub.
+
+---
+
+**Note**: This application is currently in Phase 0 and shows sample data. Real TikTok API integration will be implemented after TikTok app approval.

@@ -1,0 +1,42 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+@layer base {
+  html {
+    font-family: 'Inter', system-ui, sans-serif;
+  }
+  
+  body {
+    @apply bg-tiktok-dark text-white;
+  }
+}
+
+@layer components {
+  .btn-primary {
+    @apply bg-gradient-to-r from-tiktok-primary to-tiktok-secondary text-white font-semibold py-3 px-6 rounded-lg hover:opacity-90 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-tiktok-primary focus:ring-opacity-50;
+  }
+  
+  .btn-secondary {
+    @apply bg-tiktok-dark-light text-white font-semibold py-3 px-6 rounded-lg border border-gray-600 hover:bg-gray-700 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-opacity-50;
+  }
+  
+  .card {
+    @apply bg-tiktok-dark-light rounded-xl p-6 border border-gray-700 shadow-lg;
+  }
+  
+  .gradient-text {
+    @apply bg-gradient-to-r from-tiktok-primary to-tiktok-secondary bg-clip-text text-transparent;
+  }
+}
+
+/* Respect reduced motion preferences */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
