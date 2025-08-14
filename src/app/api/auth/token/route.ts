@@ -8,6 +8,15 @@ export async function POST(request: NextRequest) {
     const clientSecret = process.env.TIKTOK_CLIENT_SECRET
     const baseUrl = process.env.NEXT_PUBLIC_APP_BASE_URL
 
+    console.log('Environment check:', {
+      hasClientKey: !!clientKey,
+      hasClientSecret: !!clientSecret,
+      hasBaseUrl: !!baseUrl,
+      clientKeyLength: clientKey?.length || 0,
+      clientSecretLength: clientSecret?.length || 0,
+      baseUrl: baseUrl
+    })
+
     if (!clientKey || !clientSecret || !baseUrl) {
       console.error('Missing TikTok OAuth credentials')
       return NextResponse.json({ 
@@ -22,7 +31,8 @@ export async function POST(request: NextRequest) {
       clientKey: clientKey.substring(0, 8) + '...',
       baseUrl,
       code: code.substring(0, 10) + '...',
-      hasCodeVerifier: !!codeVerifier
+      hasCodeVerifier: !!codeVerifier,
+      redirectUri: `${baseUrl}/auth/callback`
     })
 
     const tokenRequestBody: any = {
@@ -38,6 +48,15 @@ export async function POST(request: NextRequest) {
       tokenRequestBody.code_verifier = codeVerifier
     }
 
+    console.log('Token request body (sanitized):', {
+      client_key: tokenRequestBody.client_key.substring(0, 8) + '...',
+      client_secret: '***',
+      code: tokenRequestBody.code.substring(0, 10) + '...',
+      grant_type: tokenRequestBody.grant_type,
+      redirect_uri: tokenRequestBody.redirect_uri,
+      has_code_verifier: !!tokenRequestBody.code_verifier
+    })
+
     const response = await fetch('https://open.tiktokapis.com/v2/oauth/token/', {
       method: 'POST',
       headers: {
@@ -47,6 +66,7 @@ export async function POST(request: NextRequest) {
     })
 
     console.log('TikTok API response status:', response.status, response.statusText)
+    console.log('TikTok API response headers:', Object.fromEntries(response.headers.entries()))
 
     if (!response.ok) {
       const errorText = await response.text()
@@ -62,19 +82,35 @@ export async function POST(request: NextRequest) {
       }, { status: response.status })
     }
 
-    const data = await response.json()
-    console.log('Token exchange successful, access token received')
-    console.log('TikTok API response data:', data)
+    const responseText = await response.text()
+    console.log('Raw TikTok API response:', responseText)
+    
+    let data
+    try {
+      data = JSON.parse(responseText)
+    } catch (parseError) {
+      console.error('Failed to parse TikTok API response as JSON:', parseError)
+      return NextResponse.json({ 
+        error: 'Invalid JSON response from TikTok',
+        details: 'Response could not be parsed as JSON',
+        rawResponse: responseText.substring(0, 200) + '...'
+      }, { status: 500 })
+    }
+    
+    console.log('Parsed TikTok API response data:', data)
     
     // Check if the response is empty or missing access_token
     if (!data || !data.access_token) {
       console.error('Token response is empty or missing access_token:', data)
       return NextResponse.json({ 
         error: 'Invalid token response from TikTok',
-        details: 'Response is empty or missing access_token'
+        details: 'Response is empty or missing access_token',
+        responseKeys: data ? Object.keys(data) : 'no data',
+        responseData: data
       }, { status: 500 })
     }
     
+    console.log('Token exchange successful, access token received')
     return NextResponse.json({ 
       access_token: data.access_token,
       refresh_token: data.refresh_token,

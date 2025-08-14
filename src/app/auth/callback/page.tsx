@@ -28,10 +28,9 @@ async function exchangeCodeForToken(code: string): Promise<string | null> {
     // Get the code verifier from session storage
     const codeVerifier = getCodeVerifier()
 
-    console.log('Attempting token exchange with:', {
-      code: code.substring(0, 10) + '...',
-      hasCodeVerifier: !!codeVerifier
-    })
+    console.log('Starting token exchange process...')
+    console.log('Code verifier found:', !!codeVerifier)
+    console.log('Code length:', code.length)
 
     const response = await fetch('/api/auth/token', {
       method: 'POST',
@@ -44,6 +43,8 @@ async function exchangeCodeForToken(code: string): Promise<string | null> {
       })
     })
 
+    console.log('Token API response status:', response.status, response.statusText)
+
     if (!response.ok) {
       const errorData = await response.json()
       console.error('Token exchange failed:', errorData)
@@ -51,8 +52,9 @@ async function exchangeCodeForToken(code: string): Promise<string | null> {
     }
 
     const data = await response.json()
-    console.log('Token exchange successful, access token received')
-    console.log('Token response data:', data)
+    console.log('Token exchange successful, response keys:', Object.keys(data))
+    console.log('Access token present:', !!data.access_token)
+    console.log('Access token length:', data.access_token?.length || 0)
     return data.access_token
   } catch (error) {
     console.error('Error exchanging code for token:', error)
@@ -137,7 +139,7 @@ function CallbackContent() {
         // Fetch video data
         const videoData = await fetchVideos(accessToken)
         
-                if (videoData && 'totalViews' in videoData) {
+        if (videoData && 'totalViews' in videoData) {
           console.log('Video data received successfully:', videoData)
           setTotalViews(videoData.totalViews)
           setVideoCount(videoData.videoCount)
@@ -145,14 +147,16 @@ function CallbackContent() {
         } else if (videoData && 'error' in videoData && videoData.status === 401) {
           console.log('Video fetch failed with 401 - expected in sandbox mode, showing sample data')
           // Don't show error for 401 - this is expected in sandbox mode
+          setErrorMessage('Live data unavailable in sandbox mode — showing sample data instead.')
+          setErrorType('sandbox_mode')
         } else {
           console.log('Video fetch failed, showing sample data')
-          setErrorMessage('Unable to fetch live data — this is expected in sandbox mode. Showing sample data instead.')
+          setErrorMessage('Unable to fetch live data — showing sample data instead.')
           setErrorType('video_fetch_error')
         }
       } else {
         console.log('No access token received')
-        setErrorMessage('Unable to authenticate — please check your TikTok app configuration.')
+        setErrorMessage('Authentication failed — this may be due to app configuration or sandbox mode limitations. Showing sample data instead.')
         setErrorType('token_error')
       }
 
