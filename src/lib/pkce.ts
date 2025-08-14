@@ -14,7 +14,7 @@ export async function generateCodeChallenge(verifier: string): Promise<string> {
 }
 
 function base64URLEncode(buffer: Uint8Array): string {
-  return btoa(String.fromCharCode(...buffer))
+  return btoa(String.fromCharCode(...Array.from(buffer)))
     .replace(/\+/g, '-')
     .replace(/\//g, '_')
     .replace(/=/g, '')
