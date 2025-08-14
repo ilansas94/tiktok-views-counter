@@ -59,7 +59,7 @@ async function exchangeCodeForToken(code: string): Promise<string | null> {
   }
 }
 
-async function fetchVideos(accessToken: string): Promise<{ totalViews: number; videoCount: number } | null> {
+async function fetchVideos(accessToken: string): Promise<{ totalViews: number; videoCount: number } | { error: string; status: number } | null> {
   try {
     console.log('Starting video fetch with access token')
 
@@ -78,6 +78,11 @@ async function fetchVideos(accessToken: string): Promise<{ totalViews: number; v
         statusText: response.statusText,
         error: errorData
       })
+      
+      // Return error info for 401 (expected in sandbox mode)
+      if (response.status === 401) {
+        return { error: 'unauthorized', status: 401 }
+      }
       return null
     }
 
@@ -129,11 +134,14 @@ function CallbackContent() {
         // Fetch video data
         const videoData = await fetchVideos(accessToken)
         
-        if (videoData) {
+                if (videoData && 'totalViews' in videoData) {
           console.log('Video data received successfully:', videoData)
           setTotalViews(videoData.totalViews)
           setVideoCount(videoData.videoCount)
           setIsLiveData(true)
+        } else if (videoData && 'error' in videoData && videoData.status === 401) {
+          console.log('Video fetch failed with 401 - expected in sandbox mode, showing sample data')
+          // Don't show error for 401 - this is expected in sandbox mode
         } else {
           console.log('Video fetch failed, showing sample data')
           setErrorMessage('Unable to fetch live data — this is expected in sandbox mode. Showing sample data instead.')
