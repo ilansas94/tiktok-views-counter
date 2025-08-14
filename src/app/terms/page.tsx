@@ -82,8 +82,8 @@ export default function TermsPage() {
                 <h2 className="text-xl font-semibold mb-3 text-white">Contact</h2>
                 <p>
                   For questions about these terms, please contact us at:{' '}
-                  <a href="mailto:legal@yourdomain.com" className="text-tiktok-primary hover:underline">
-                    legal@yourdomain.com
+                  <a href="mailto:ilansas94@gmail.com" className="text-tiktok-primary hover:underline">
+                    ilansas94@gmail.com
                   </a>
                 </p>
               </section>
