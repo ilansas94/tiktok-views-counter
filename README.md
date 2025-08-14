@@ -67,22 +67,21 @@ Open [http://localhost:3000](http://localhost:3000) to view the application.
 ## Project Structure
 
 ```
-src/
-├── app/                    # Next.js App Router pages
-│   ├── auth/              # OAuth routes
-│   │   ├── login/         # Login page
-│   │   └── callback/      # OAuth callback
-│   ├── privacy/           # Privacy policy
-│   ├── terms/             # Terms of service
-│   ├── layout.tsx         # Root layout
-│   ├── page.tsx           # Home page
-│   └── globals.css        # Global styles
-├── components/            # Reusable components
-│   ├── Header.tsx         # Site header
-│   └── Footer.tsx         # Site footer
+app/                      # Next.js App Router pages
+├── auth/                # OAuth routes
+│   ├── login/           # Login page
+│   └── callback/        # OAuth callback
+├── privacy/             # Privacy policy
+├── terms/               # Terms of service
+├── layout.tsx           # Root layout
+├── page.tsx             # Home page
+└── globals.css          # Global styles
+components/              # Reusable components
+├── Header.tsx           # Site header
+└── Footer.tsx           # Site footer
 public/
-├── favicon.png           # App icon
-└── Assets/               # Original assets
+├── favicon.png         # App icon
+└── Assets/             # Original assets
 ```
 
 ## Development Phases
