@@ -73,7 +73,11 @@ async function fetchVideos(accessToken: string): Promise<{ totalViews: number; v
 
     if (!response.ok) {
       const errorData = await response.json()
-      console.error('Video fetch failed:', errorData)
+      console.error('Video fetch failed:', {
+        status: response.status,
+        statusText: response.statusText,
+        error: errorData
+      })
       return null
     }
 
@@ -121,18 +125,22 @@ function CallbackContent() {
       const accessToken = await exchangeCodeForToken(code)
       
       if (accessToken) {
+        console.log('Access token received, attempting to fetch videos...')
         // Fetch video data
         const videoData = await fetchVideos(accessToken)
         
         if (videoData) {
+          console.log('Video data received successfully:', videoData)
           setTotalViews(videoData.totalViews)
           setVideoCount(videoData.videoCount)
           setIsLiveData(true)
         } else {
+          console.log('Video fetch failed, showing sample data')
           setErrorMessage('Unable to fetch live data — this is expected in sandbox mode. Showing sample data instead.')
           setErrorType('video_fetch_error')
         }
       } else {
+        console.log('No access token received')
         setErrorMessage('Unable to authenticate — please check your TikTok app configuration.')
         setErrorType('token_error')
       }
