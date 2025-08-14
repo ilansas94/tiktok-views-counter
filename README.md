@@ -55,15 +55,10 @@ Edit `.env.local` and add your TikTok OAuth credentials:
 TIKTOK_CLIENT_KEY=your_tiktok_client_key_here
 TIKTOK_CLIENT_SECRET=your_tiktok_client_secret_here
 
-# App Configuration
-APP_BASE_URL=http://localhost:3000
-
-# TikTok API Scopes
-TIKTOK_SCOPES=user.info.basic,video.list
-
-# Next.js Public Variables
+# App Configuration (Public)
 NEXT_PUBLIC_APP_BASE_URL=http://localhost:3000
-NEXT_PUBLIC_TIKTOK_CLIENT_KEY=your_tiktok_client_key_here
+
+# TikTok API Scopes (Public)
 NEXT_PUBLIC_TIKTOK_SCOPES=user.info.basic,video.list
 ```
 
