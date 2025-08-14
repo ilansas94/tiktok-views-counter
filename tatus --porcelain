@@ -1,0 +1,5 @@
+[33m234ccbe[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m, [m[1;31morigin/main[m[33m)[m Fix TikTok verification filename to match token content (kaIp)
+[33m18b5cd3[m Fix TikTok verification token content
+[33ma7c2aee[m Update TikTok verification file with actual token content
+[33m3f1afad[m Add TikTok URL-prefix verification file and documentation
+[33mdc854d3[m feat: implement production-ready TikTok OAuth flow

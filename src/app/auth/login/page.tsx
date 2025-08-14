@@ -1,10 +1,50 @@
-import { redirect } from 'next/navigation'
+'use client'
+
+import { useEffect } from 'react'
+import { useRouter } from 'next/navigation'
 import Link from 'next/link'
+import { generateCodeVerifier, generateCodeChallenge, storeCodeVerifier } from '@/lib/pkce'
 
 export default function LoginPage() {
-  const clientKey = process.env.TIKTOK_CLIENT_KEY
+  const router = useRouter()
+  const clientKey = process.env.NEXT_PUBLIC_TIKTOK_CLIENT_KEY
   const baseUrl = process.env.NEXT_PUBLIC_APP_BASE_URL
   const scopes = process.env.NEXT_PUBLIC_TIKTOK_SCOPES
+
+  useEffect(() => {
+    const handleAuth = async () => {
+      if (clientKey && baseUrl) {
+        try {
+          // Generate PKCE values
+          const codeVerifier = generateCodeVerifier()
+          const codeChallenge = await generateCodeChallenge(codeVerifier)
+          
+          // Store code verifier for later use
+          storeCodeVerifier(codeVerifier)
+          
+          // Generate state parameter
+          const state = Math.random().toString(36).substring(7)
+          
+          // Construct TikTok OAuth URL with PKCE
+          const authUrl = new URL('https://www.tiktok.com/v2/auth/authorize/')
+          authUrl.searchParams.set('client_key', clientKey)
+          authUrl.searchParams.set('response_type', 'code')
+          authUrl.searchParams.set('scope', scopes || 'user.info.basic,video.list')
+          authUrl.searchParams.set('redirect_uri', `${baseUrl}/auth/callback`)
+          authUrl.searchParams.set('state', state)
+          authUrl.searchParams.set('code_challenge', codeChallenge)
+          authUrl.searchParams.set('code_challenge_method', 'S256')
+          
+          // Redirect to TikTok OAuth
+          window.location.href = authUrl.toString()
+        } catch (error) {
+          console.error('Error generating code challenge:', error)
+        }
+      }
+    }
+
+    handleAuth()
+  }, [clientKey, baseUrl, scopes, router])
 
   // If clientKey is missing, render error message
   if (!clientKey) {
@@ -50,9 +90,18 @@ export default function LoginPage() {
     )
   }
 
-  // Construct TikTok OAuth URL
-  const authUrl = `https://www.tiktok.com/v2/auth/authorize/?client_key=${clientKey}&response_type=code&scope=${encodeURIComponent(scopes || 'user.info.basic,video.list')}&redirect_uri=${encodeURIComponent(baseUrl + '/auth/callback')}&state=${Math.random().toString(36).substring(7)}`
-  
-  // Redirect to TikTok OAuth
-  redirect(authUrl)
+  // Show loading state while redirecting
+  return (
+    <div className="min-h-screen flex items-center justify-center bg-tiktok-dark">
+      <div className="max-w-md w-full mx-auto p-6">
+        <div className="card">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-tiktok-primary mx-auto mb-4"></div>
+            <h1 className="text-xl font-bold mb-2">Redirecting to TikTok...</h1>
+            <p className="text-gray-400">Please wait while we redirect you to TikTok for authorization.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  )
 }

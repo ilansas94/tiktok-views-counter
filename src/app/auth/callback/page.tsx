@@ -1,5 +1,8 @@
-import { Suspense } from 'react'
+'use client'
+
+import { Suspense, useEffect, useState } from 'react'
 import Link from 'next/link'
+import { getCodeVerifier } from '@/lib/pkce'
 
 interface VideoData {
   view_count: number
@@ -21,35 +24,33 @@ interface TikTokTokenResponse {
 
 async function exchangeCodeForToken(code: string): Promise<string | null> {
   try {
-    const clientKey = process.env.TIKTOK_CLIENT_KEY
-    const clientSecret = process.env.TIKTOK_CLIENT_SECRET
-    const baseUrl = process.env.NEXT_PUBLIC_APP_BASE_URL
+    // Get the code verifier from session storage
+    const codeVerifier = getCodeVerifier()
 
-    if (!clientKey || !clientSecret || !baseUrl) {
-      console.error('Missing TikTok OAuth credentials')
-      return null
-    }
+    console.log('Attempting token exchange with:', {
+      code: code.substring(0, 10) + '...',
+      hasCodeVerifier: !!codeVerifier
+    })
 
-    const response = await fetch('https://open.tiktokapis.com/v2/oauth/token/', {
+    const response = await fetch('/api/auth/token', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        client_key: clientKey,
-        client_secret: clientSecret,
-        code: code,
-        grant_type: 'authorization_code',
-        redirect_uri: `${baseUrl}/auth/callback`
+        code,
+        codeVerifier
       })
     })
 
     if (!response.ok) {
-      console.error('Token exchange failed:', response.status, response.statusText)
+      const errorData = await response.json()
+      console.error('Token exchange failed:', errorData)
       return null
     }
 
-    const data: TikTokTokenResponse = await response.json()
+    const data = await response.json()
+    console.log('Token exchange successful, access token received')
     return data.access_token
   } catch (error) {
     console.error('Error exchanging code for token:', error)
@@ -59,80 +60,94 @@ async function exchangeCodeForToken(code: string): Promise<string | null> {
 
 async function fetchVideos(accessToken: string): Promise<{ totalViews: number; videoCount: number } | null> {
   try {
-    let totalViews = 0
-    let videoCount = 0
-    let cursor = ''
-    let hasMore = true
+    console.log('Starting video fetch with access token')
 
-    while (hasMore) {
-      const response = await fetch('https://open.tiktokapis.com/v2/video/list/', {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${accessToken}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          max_count: 20,
-          ...(cursor && { cursor })
-        })
-      })
+    const response = await fetch('/api/videos', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ accessToken })
+    })
 
-      if (!response.ok) {
-        console.error('Video list API failed:', response.status, response.statusText)
-        return null
-      }
-
-      const data: TikTokVideoResponse = await response.json()
-      
-      // Sum view counts
-      data.data.videos.forEach(video => {
-        totalViews += video.view_count
-        videoCount++
-      })
-
-      cursor = data.data.cursor
-      hasMore = data.data.has_more
+    if (!response.ok) {
+      const errorData = await response.json()
+      console.error('Video fetch failed:', errorData)
+      return null
     }
 
-    return { totalViews, videoCount }
+    const data = await response.json()
+    console.log('Video fetch completed:', data)
+    return data
   } catch (error) {
     console.error('Error fetching videos:', error)
     return null
   }
 }
 
-async function CallbackContent({ searchParams }: { searchParams: { [key: string]: string | string[] | undefined } }) {
-  const code = searchParams.code as string
-  const error = searchParams.error as string
-  const errorDescription = searchParams.error_description as string
+function CallbackContent({ searchParams }: { searchParams: { [key: string]: string | string[] | undefined } }) {
+  const [totalViews, setTotalViews] = useState(12345678) // Sample data fallback
+  const [videoCount, setVideoCount] = useState(42) // Sample data fallback
+  const [isLiveData, setIsLiveData] = useState(false)
+  const [errorMessage, setErrorMessage] = useState('')
+  const [errorType, setErrorType] = useState('')
+  const [isLoading, setIsLoading] = useState(true)
 
-  let totalViews = 12345678 // Sample data fallback
-  let videoCount = 42 // Sample data fallback
-  let isLiveData = false
-  let errorMessage = ''
+  useEffect(() => {
+    async function processCallback() {
+      const code = searchParams.code as string
+      const error = searchParams.error as string
+      const errorDescription = searchParams.error_description as string
 
-  if (error) {
-    errorMessage = errorDescription || 'Authentication failed. Please try again.'
-  } else if (code) {
-    // Exchange code for access token
-    const accessToken = await exchangeCodeForToken(code)
-    
-    if (accessToken) {
-      // Fetch video data
-      const videoData = await fetchVideos(accessToken)
-      
-      if (videoData) {
-        totalViews = videoData.totalViews
-        videoCount = videoData.videoCount
-        isLiveData = true
-      } else {
-        errorMessage = 'Unable to fetch live data — showing sample data instead.'
+      if (error) {
+        setErrorMessage(errorDescription || 'Authentication failed. Please try again.')
+        setErrorType('auth_error')
+        setIsLoading(false)
+        return
       }
-    } else {
-      errorMessage = 'Unable to fetch live data — showing sample data instead.'
+
+      if (!code) {
+        setErrorMessage('Invalid callback. Please try logging in again.')
+        setErrorType('invalid_callback')
+        setIsLoading(false)
+        return
+      }
+
+      // Exchange code for access token
+      const accessToken = await exchangeCodeForToken(code)
+      
+      if (accessToken) {
+        // Fetch video data
+        const videoData = await fetchVideos(accessToken)
+        
+        if (videoData) {
+          setTotalViews(videoData.totalViews)
+          setVideoCount(videoData.videoCount)
+          setIsLiveData(true)
+        } else {
+          setErrorMessage('Unable to fetch live data — this is expected in sandbox mode. Showing sample data instead.')
+          setErrorType('video_fetch_error')
+        }
+      } else {
+        setErrorMessage('Unable to authenticate — please check your TikTok app configuration.')
+        setErrorType('token_error')
+      }
+
+      setIsLoading(false)
     }
-  } else {
-    errorMessage = 'Invalid callback. Please try logging in again.'
+
+    processCallback()
+  }, [searchParams])
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-tiktok-dark">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-tiktok-primary mx-auto mb-4"></div>
+          <p className="text-gray-400">Processing...</p>
+        </div>
+      </div>
+    )
   }
 
   return (
