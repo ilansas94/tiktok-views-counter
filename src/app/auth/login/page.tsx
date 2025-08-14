@@ -1,4 +1,5 @@
 'use client'
+// Force redeploy to pick up environment variables
 
 import { useEffect } from 'react'
 import { useRouter } from 'next/navigation'
