@@ -95,7 +95,7 @@ function CallbackContent({ searchParams }: { searchParams: { [key: string]: stri
 
   useEffect(() => {
     async function processCallback() {
-      const code = searchParams.code as string
+      const code = decodeURIComponent(searchParams.code as string || '')
       const error = searchParams.error as string
       const errorDescription = searchParams.error_description as string
 
@@ -106,6 +106,8 @@ function CallbackContent({ searchParams }: { searchParams: { [key: string]: stri
         return
       }
 
+      console.log('Received code:', code ? code.substring(0, 20) + '...' : 'NO CODE')
+      
       if (!code) {
         setErrorMessage('Invalid callback. Please try logging in again.')
         setErrorType('invalid_callback')
