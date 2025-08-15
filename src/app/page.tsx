@@ -320,8 +320,12 @@ function AuthenticatedViewsCard() {
                   
                   const data = await response.json()
                   if (data.success) {
+                    const message = data.is_update 
+                      ? `Score updated! You're now ranked #${data.user_rank} on the leaderboard!`
+                      : `Congratulations! You're now ranked #${data.user_rank} on the leaderboard!`
+                    
                     setToast({
-                      message: `Congratulations! You're now ranked #${data.user_rank} on the leaderboard!`,
+                      message: message,
                       type: 'success',
                       isVisible: true
                     })
@@ -348,7 +352,7 @@ function AuthenticatedViewsCard() {
               className="btn-primary w-full block"
               disabled={totalViews === 0}
             >
-              Submit to Leaderboard
+              {totalViews === 0 ? 'Submit to Leaderboard' : 'Submit/Update Leaderboard Score'}
             </button>
             <button
               onClick={handleLogout}
