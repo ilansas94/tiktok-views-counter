@@ -3,6 +3,7 @@
 import Link from 'next/link'
 import { ViewsCard } from '@/components/ViewsCard'
 import { HowItWorks } from '@/components/HowItWorks'
+import { Leaderboard } from '@/components/Leaderboard'
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 
@@ -285,7 +286,38 @@ function AuthenticatedViewsCard() {
         )}
         
         {!isAuthLoading && userInfo && (
-          <div className="mt-4">
+          <div className="mt-4 space-y-3">
+            <button
+              onClick={async () => {
+                try {
+                  const response = await fetch('/api/leaderboard', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                      username: userInfo.username,
+                      display_name: userInfo.display_name,
+                      total_views: totalViews,
+                      video_count: videoCount,
+                      avatar_url: userInfo.avatar_url
+                    })
+                  })
+                  
+                  const data = await response.json()
+                  if (data.success) {
+                    alert(`Successfully submitted to leaderboard! Your rank: #${data.user_rank}`)
+                  } else {
+                    alert('Failed to submit to leaderboard: ' + data.error)
+                  }
+                } catch (error) {
+                  console.error('Error submitting to leaderboard:', error)
+                  alert('Failed to submit to leaderboard')
+                }
+              }}
+              className="btn-primary w-full block"
+              disabled={totalViews === 0}
+            >
+              Submit to Leaderboard
+            </button>
             <button
               onClick={handleLogout}
               className="btn-secondary w-full block"
@@ -387,6 +419,15 @@ export default function Home() {
           </div>
         </section>
       )}
+
+      {/* Leaderboard Section */}
+      <section className="py-16 bg-tiktok-dark">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-center">
+            <Leaderboard />
+          </div>
+        </div>
+      </section>
 
       {/* How It Works Section */}
       <HowItWorks />
