@@ -89,31 +89,32 @@ function AuthenticatedViewsCard() {
         setIsLiveData(true);
         
         if (vids.length === 0) {
-          setErrorMessage('No videos found in response')
-          
-          // Fetch diagnostic info when no videos found
-          try {
-            const [debugResponse, whoamiResponse, statusResponse] = await Promise.all([
-              fetch('/api/tiktok/debug'),
-              fetch('/api/tiktok/whoami'),
-              fetch('/api/tiktok/status')
-            ])
-            
-            const debugData = await debugResponse.json()
-            const whoamiData = await whoamiResponse.json()
-            const statusData = await statusResponse.json()
-            
-            setDebugInfo(debugData)
-            setWhoamiInfo(whoamiData)
-            setStatusInfo(statusData)
-          } catch (debugError) {
-            console.error('Diagnostic fetch failed:', debugError)
-          }
+          // Don't set error message for valid response with 0 videos
+          // Only fetch diagnostic info if there's an actual error
         }
       } catch (e: any) {
         setVideoCount(0);
         setTotalViews(0);
         setErrorMessage(e.message || String(e));
+        
+        // Fetch diagnostic info when there's an actual error
+        try {
+          const [debugResponse, whoamiResponse, statusResponse] = await Promise.all([
+            fetch('/api/tiktok/debug'),
+            fetch('/api/tiktok/whoami'),
+            fetch('/api/tiktok/status')
+          ])
+          
+          const debugData = await debugResponse.json()
+          const whoamiData = await whoamiResponse.json()
+          const statusData = await statusResponse.json()
+          
+          setDebugInfo(debugData)
+          setWhoamiInfo(whoamiData)
+          setStatusInfo(statusData)
+        } catch (debugError) {
+          console.error('Diagnostic fetch failed:', debugError)
+        }
       } finally {
         setIsLoading(false);
       }
@@ -213,15 +214,8 @@ function AuthenticatedViewsCard() {
         </div>
 
         {!isLoading && !errorMessage && videoCount === 0 && (
-          <div className="bg-yellow-500/20 border border-yellow-500/30 rounded-lg p-4 mb-4">
-            <div className="flex items-center">
-              <svg className="w-5 h-5 text-yellow-400 mr-2" fill="currentColor" viewBox="0 0 20 20">
-                <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
-              </svg>
-              <span className="text-yellow-400 text-sm font-medium">
-                No videos found in response
-              </span>
-            </div>
+          <div className="text-gray-400 text-sm mb-4">
+            This TikTok account currently has no public videos.
           </div>
         )}
         
@@ -238,8 +232,8 @@ function AuthenticatedViewsCard() {
           </div>
         )}
 
-        {/* Enhanced diagnostic hints when videos.length === 0 */}
-        {debugInfo && debugInfo.count === 0 && (
+        {/* Enhanced diagnostic hints only for actual errors */}
+        {errorMessage && debugInfo && debugInfo.count === 0 && (
           <div className="bg-blue-500/20 border border-blue-500/30 rounded-lg p-4 mb-4">
             <div className="flex items-start">
               <svg className="w-5 h-5 text-blue-400 mr-2 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
