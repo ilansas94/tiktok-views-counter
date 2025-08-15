@@ -1,6 +1,111 @@
+'use client'
+
 import Link from 'next/link'
 import { ViewsCard } from '@/components/ViewsCard'
 import { HowItWorks } from '@/components/HowItWorks'
+import { useEffect, useState } from 'react'
+
+async function fetchVideos(cursor = 0) {
+  const r = await fetch('/api/videos', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ cursor }) // token comes from cookie
+  })
+  const j = await r.json()
+  if (!r.ok) throw new Error(`Video fetch failed: ${JSON.stringify(j)}`)
+  return j
+}
+
+function AuthenticatedViewsCard() {
+  const [totalViews, setTotalViews] = useState(0)
+  const [videoCount, setVideoCount] = useState(0)
+  const [isLiveData, setIsLiveData] = useState(false)
+  const [errorMessage, setErrorMessage] = useState('')
+  const [isLoading, setIsLoading] = useState(true)
+
+  useEffect(() => {
+    async function loadVideos() {
+      try {
+        const videoData = await fetchVideos()
+        
+        if (videoData.data?.videos) {
+          let totalViews = 0
+          let videoCount = 0
+          
+          videoData.data.videos.forEach((video: any) => {
+            totalViews += video.view_count || 0
+            videoCount++
+          })
+          
+          setTotalViews(totalViews)
+          setVideoCount(videoCount)
+          setIsLiveData(true)
+          console.log('Live data loaded successfully:', { totalViews, videoCount })
+        } else {
+          setErrorMessage('No videos found in response')
+        }
+      } catch (error) {
+        console.error('Video fetch failed:', error)
+        setErrorMessage(error instanceof Error ? error.message : 'Unknown error occurred')
+      } finally {
+        setIsLoading(false)
+      }
+    }
+
+    loadVideos()
+  }, [])
+
+  if (isLoading) {
+    return (
+      <div className="card max-w-md w-full">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-tiktok-primary mx-auto mb-4"></div>
+          <p className="text-gray-400">Loading your data...</p>
+        </div>
+      </div>
+    )
+  }
+
+  return (
+    <div className="card max-w-md w-full">
+      <div className="text-center">
+        <h3 className="text-lg font-semibold text-gray-300 mb-2">
+          Total Views
+        </h3>
+        
+        <div className="mb-4">
+          <span className="text-4xl md:text-5xl font-bold gradient-text">
+            {totalViews.toLocaleString()}
+          </span>
+        </div>
+        
+        <div className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium mb-4 bg-green-500/20 text-green-400 border border-green-500/30">
+          <svg className="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
+            <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+          </svg>
+          Live Data
+        </div>
+        
+        <div className="text-sm text-gray-400 mb-4">
+          {videoCount} video{videoCount !== 1 ? 's' : ''} counted
+        </div>
+
+        {errorMessage && (
+          <div className="bg-red-500/20 border border-red-500/30 rounded-lg p-4 mb-4">
+            <div className="flex items-center">
+              <svg className="w-5 h-5 text-red-400 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+              </svg>
+              <span className="text-red-400 text-sm font-medium">
+                {errorMessage}
+              </span>
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  )
+}
 
 export default function Home() {
   return (
@@ -37,7 +142,7 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Sample Data Section */}
+      {/* Data Section */}
       <section className="py-16 bg-tiktok-dark-light">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
@@ -45,12 +150,12 @@ export default function Home() {
               See Your Total Views
             </h2>
             <p className="text-gray-300 text-lg">
-              Preview of what you&apos;ll see after connecting your account
+              Connect your account to see your actual total views
             </p>
           </div>
           
           <div className="flex justify-center">
-            <ViewsCard />
+            <AuthenticatedViewsCard />
           </div>
         </div>
       </section>

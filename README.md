@@ -4,19 +4,20 @@ A modern web application that allows TikTok creators to view the total number of
 
 ## 🚀 Features
 
-- **Secure OAuth Integration**: Official TikTok OAuth 2.0 flow
+- **Secure OAuth Integration**: Official TikTok OAuth 2.0 flow with server-side token handling
+- **Real-Time Data**: Fetch actual view counts from TikTok API
 - **Total Views Calculation**: Sum up views across all your videos
 - **Modern UI**: Dark theme with TikTok brand colors
 - **Responsive Design**: Works on desktop and mobile
-- **Privacy-First**: No data stored on servers
-- **Sample Data**: Preview functionality during development
+- **Privacy-First**: Secure HTTP-only cookies, no data stored on servers
+- **Sandbox Support**: Works with TikTok Sandbox tester accounts
 
 ## 🛠️ Tech Stack
 
 - **Framework**: Next.js 14 (App Router)
 - **Language**: TypeScript
 - **Styling**: Tailwind CSS
-- **Authentication**: TikTok OAuth 2.0
+- **Authentication**: TikTok OAuth 2.0 with server-side callback
 - **Deployment**: Vercel (recommended)
 
 ## 📋 Prerequisites
@@ -52,11 +53,15 @@ Edit `.env.local` and add your TikTok OAuth credentials:
 
 ```env
 # TikTok OAuth Configuration
-TIKTOK_CLIENT_KEY=your_tiktok_client_key_here
-TIKTOK_CLIENT_SECRET=your_tiktok_client_secret_here
+TIKTOK_CLIENT_KEY=YOUR_KEY
+TIKTOK_CLIENT_SECRET=YOUR_SECRET
+TIKTOK_REDIRECT_URI=https://tiktok-views-counter.vercel.app/auth/callback
 
 # App Configuration (Public)
-NEXT_PUBLIC_APP_BASE_URL=http://localhost:3000
+NEXT_PUBLIC_APP_BASE_URL=https://tiktok-views-counter.vercel.app
+
+# TikTok Client Key (Public - needed for client-side OAuth)
+NEXT_PUBLIC_TIKTOK_CLIENT_KEY=YOUR_KEY
 
 # TikTok API Scopes (Public)
 NEXT_PUBLIC_TIKTOK_SCOPES=user.info.basic,video.list
@@ -66,8 +71,9 @@ NEXT_PUBLIC_TIKTOK_SCOPES=user.info.basic,video.list
 
 1. Go to [TikTok for Developers](https://developers.tiktok.com/)
 2. Create a new app
-3. Add OAuth redirect URL: `http://localhost:3000/auth/callback`
+3. Add OAuth redirect URL: `https://tiktok-views-counter.vercel.app/auth/callback`
 4. Copy your Client Key and Client Secret
+5. Add a Sandbox Target User for testing
 
 ### 5. Run Development Server
 
@@ -79,11 +85,16 @@ Open [http://localhost:3000](http://localhost:3000) in your browser.
 
 ## 📱 Pages
 
-- **Home** (`/`): Hero section, CTA, sample data preview, "How it works"
+- **Home** (`/`): Hero section, CTA, live data display, "How it works"
 - **Login** (`/auth/login`): TikTok OAuth login page
-- **Callback** (`/auth/callback`): OAuth callback handler
+- **Callback** (`/api/auth/callback`): Server-side OAuth callback handler
 - **Privacy** (`/privacy`): Privacy policy
 - **Terms** (`/terms`): Terms of service
+
+## 🔧 API Endpoints
+
+- **OAuth Callback** (`/api/auth/callback`): Handles TikTok OAuth callback, exchanges code for token, sets secure cookies
+- **Video List** (`/api/videos`): Proxies TikTok video.list API calls using stored access token
 
 ## 🎨 Design System
 

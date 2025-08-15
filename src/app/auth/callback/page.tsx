@@ -3,103 +3,22 @@
 import { Suspense, useEffect, useState } from 'react'
 import { useSearchParams } from 'next/navigation'
 import Link from 'next/link'
-import { getCodeVerifier } from '@/lib/pkce'
 
-interface VideoData {
-  view_count: number
-}
-
-interface TikTokVideoResponse {
-  data: {
-    videos: VideoData[]
-    cursor: string
-    has_more: boolean
-  }
-}
-
-interface TikTokTokenResponse {
-  access_token: string
-  refresh_token: string
-  expires_in: number
-}
-
-async function exchangeCodeForToken(code: string): Promise<string | null> {
-  try {
-    // Get the code verifier from session storage
-    const codeVerifier = getCodeVerifier()
-
-    console.log('Attempting token exchange with:', {
-      code: code.substring(0, 10) + '...',
-      hasCodeVerifier: !!codeVerifier
-    })
-
-    const response = await fetch('/api/auth/token', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        code,
-        codeVerifier
-      })
-    })
-
-    if (!response.ok) {
-      const errorData = await response.json()
-      console.error('Token exchange failed:', errorData)
-      return null
-    }
-
-    const data = await response.json()
-    console.log('Token exchange successful, access token received:', {
-      hasAccessToken: !!data.access_token,
-      accessTokenLength: data.access_token?.length || 0,
-      responseData: data
-    })
-    
-    if (!data.access_token) {
-      console.error('No access token in response:', data)
-      return null
-    }
-    
-    return data.access_token
-  } catch (error) {
-    console.error('Error exchanging code for token:', error)
-    return null
-  }
-}
-
-async function fetchVideos(accessToken: string): Promise<{ totalViews: number; videoCount: number } | null> {
-  try {
-    console.log('Starting video fetch with access token')
-
-    const response = await fetch('/api/videos', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ accessToken })
-    })
-
-    if (!response.ok) {
-      const errorData = await response.json()
-      console.error('Video fetch failed:', errorData)
-      return null
-    }
-
-    const data = await response.json()
-    console.log('Video fetch completed:', data)
-    return data
-  } catch (error) {
-    console.error('Error fetching videos:', error)
-    return null
-  }
+async function fetchVideos(cursor = 0) {
+  const r = await fetch('/api/videos', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ cursor }) // token comes from cookie
+  })
+  const j = await r.json()
+  if (!r.ok) throw new Error(`Video fetch failed: ${JSON.stringify(j)}`)
+  return j
 }
 
 function CallbackContent() {
   const searchParams = useSearchParams()
-  const [totalViews, setTotalViews] = useState(12345678) // Sample data fallback
-  const [videoCount, setVideoCount] = useState(42) // Sample data fallback
+  const [totalViews, setTotalViews] = useState(0)
+  const [videoCount, setVideoCount] = useState(0)
   const [isLiveData, setIsLiveData] = useState(false)
   const [errorMessage, setErrorMessage] = useState('')
   const [errorType, setErrorType] = useState('')
@@ -107,9 +26,9 @@ function CallbackContent() {
 
   useEffect(() => {
     async function processCallback() {
-      const code = decodeURIComponent(searchParams.get('code') || '')
-      const error = searchParams.get('error') || ''
-      const errorDescription = searchParams.get('error_description') || ''
+      const code = searchParams.get('code')
+      const error = searchParams.get('error')
+      const errorDescription = searchParams.get('error_description')
 
       if (error) {
         setErrorMessage(errorDescription || 'Authentication failed. Please try again.')
@@ -127,35 +46,52 @@ function CallbackContent() {
         return
       }
 
-      // Exchange code for access token
-      const accessToken = await exchangeCodeForToken(code)
-      
-      if (accessToken) {
-        console.log('Access token received, fetching videos...')
-        // Fetch video data
-        const videoData = await fetchVideos(accessToken)
-        
-        if (videoData) {
-          setTotalViews(videoData.totalViews)
-          setVideoCount(videoData.videoCount)
-          setIsLiveData(true)
-          console.log('Live data set successfully')
-        } else {
-          setErrorMessage('Unable to fetch live data — this is expected in sandbox mode. Showing sample data instead.')
-          setErrorType('video_fetch_error')
-          console.log('Video fetch failed, showing sample data')
-        }
-      } else {
-        console.log('Token exchange failed, access token is null')
-        setErrorMessage('Unable to authenticate — please check your TikTok app configuration.')
-        setErrorType('token_error')
-      }
-
+      // The OAuth callback should have already set cookies and redirected
+      // If we're here, it means the callback didn't work properly
+      setErrorMessage('OAuth callback failed. Please try logging in again.')
+      setErrorType('callback_error')
       setIsLoading(false)
     }
 
     processCallback()
   }, [searchParams])
+
+  // Try to fetch videos on mount (cookies should be set by OAuth callback)
+  useEffect(() => {
+    async function loadVideos() {
+      try {
+        const videoData = await fetchVideos()
+        
+        if (videoData.data?.videos) {
+          let totalViews = 0
+          let videoCount = 0
+          
+          videoData.data.videos.forEach((video: any) => {
+            totalViews += video.view_count || 0
+            videoCount++
+          })
+          
+          setTotalViews(totalViews)
+          setVideoCount(videoCount)
+          setIsLiveData(true)
+          console.log('Live data loaded successfully:', { totalViews, videoCount })
+        } else {
+          setErrorMessage('No videos found in response')
+          setErrorType('no_videos')
+        }
+      } catch (error) {
+        console.error('Video fetch failed:', error)
+        setErrorMessage(error instanceof Error ? error.message : 'Unknown error occurred')
+        setErrorType('video_fetch_error')
+      } finally {
+        setIsLoading(false)
+      }
+    }
+
+    // Small delay to ensure cookies are set
+    const timer = setTimeout(loadVideos, 1000)
+    return () => clearTimeout(timer)
+  }, [])
 
   if (isLoading) {
     return (

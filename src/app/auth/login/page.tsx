@@ -1,51 +1,39 @@
 'use client'
-// Force redeploy to pick up environment variables
 
 import { useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
-import { generateCodeVerifier, generateCodeChallenge, storeCodeVerifier } from '@/lib/pkce'
 
 export default function LoginPage() {
   const router = useRouter()
   const clientKey = process.env.NEXT_PUBLIC_TIKTOK_CLIENT_KEY
-  const baseUrl = process.env.NEXT_PUBLIC_APP_BASE_URL
   const scopes = process.env.NEXT_PUBLIC_TIKTOK_SCOPES
 
   useEffect(() => {
     const handleAuth = async () => {
-      if (clientKey && baseUrl) {
+      if (clientKey) {
         try {
-          // Generate PKCE values
-          const codeVerifier = generateCodeVerifier()
-          const codeChallenge = await generateCodeChallenge(codeVerifier)
-          
-          // Store code verifier for later use
-          storeCodeVerifier(codeVerifier)
-          
           // Generate state parameter
           const state = Math.random().toString(36).substring(7)
           
-          // Construct TikTok OAuth URL with PKCE
+          // Construct TikTok OAuth URL
           const authUrl = new URL('https://www.tiktok.com/v2/auth/authorize/')
           authUrl.searchParams.set('client_key', clientKey)
           authUrl.searchParams.set('response_type', 'code')
           authUrl.searchParams.set('scope', scopes || 'user.info.basic,video.list')
-          authUrl.searchParams.set('redirect_uri', `${baseUrl}/auth/callback`)
+          authUrl.searchParams.set('redirect_uri', 'https://tiktok-views-counter.vercel.app/auth/callback')
           authUrl.searchParams.set('state', state)
-          authUrl.searchParams.set('code_challenge', codeChallenge)
-          authUrl.searchParams.set('code_challenge_method', 'S256')
           
           // Redirect to TikTok OAuth
           window.location.href = authUrl.toString()
         } catch (error) {
-          console.error('Error generating code challenge:', error)
+          console.error('Error generating auth URL:', error)
         }
       }
     }
 
     handleAuth()
-  }, [clientKey, baseUrl, scopes, router])
+  }, [clientKey, scopes, router])
 
   // If clientKey is missing, render error message
   if (!clientKey) {
