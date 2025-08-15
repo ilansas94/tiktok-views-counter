@@ -100,7 +100,7 @@ export default function LoginPage() {
             {isDebug && (
               <div className="mt-4 p-3 bg-yellow-500/20 border border-yellow-500/30 rounded-lg">
                 <p className="text-yellow-400 text-sm">
-                  Debug mode: State parameter set to "debug"
+                  Debug mode: State parameter set to &quot;debug&quot;
                 </p>
               </div>
             )}
