@@ -1,28 +1,23 @@
+// Docs: /v2/video/list (?fields=...) and /v2/video/query (?fields=... view_count/like_count/etc.)
 import { NextRequest, NextResponse } from 'next/server'
 import { cookies } from 'next/headers'
 
 // Step 1: Fields for video list (no statistics)
-const videoListFields = [
-  'id',
-  'title',
-  'create_time',
-  'duration',
-  'cover_image_url',
-  'share_url',
-]
+const videoListFields = ['id','title','create_time','duration','cover_image_url','share_url']
 
-// Step 2: Fields for video statistics
+// Step 2: Fields for video statistics (top-level counters)
 const videoStatsFields = [
   'id',
-  'statistics.view_count',
-  'statistics.like_count',
-  'statistics.comment_count',
-  'statistics.share_count',
+  'view_count',
+  'like_count',
+  'comment_count',
+  'share_count',
+  // (add 'title' if you want it echoed back from query)
 ]
 
 // Helper function to sum view counts from videos
 function sumViews(videos: any[]) {
-  return videos.reduce((sum, v) => sum + (v?.statistics?.view_count ?? 0), 0)
+  return videos.reduce((s, v) => s + (v?.statistics?.view_count ?? 0), 0)
 }
 
 export async function POST(request: NextRequest) {
@@ -95,35 +90,29 @@ export async function POST(request: NextRequest) {
       console.log('[videos] Step 2 success, stats found for:', statsJson.data?.videos?.length || 0, 'videos')
 
       // Merge statistics back onto the original videos
-      const statsMap = new Map()
+      const statsMap = new Map<string, any>()
       statsJson.data?.videos?.forEach((v: any) => {
-        statsMap.set(v.id, v.statistics)
+        statsMap.set(v.id, {
+          view_count: v.view_count ?? 0,
+          like_count: v.like_count ?? 0,
+          comment_count: v.comment_count ?? 0,
+          share_count: v.share_count ?? 0,
+        })
       })
 
       videosWithStats = videosWithStats.map((video: any) => ({
         ...video,
-        statistics: statsMap.get(video.id) || { view_count: 0, like_count: 0, comment_count: 0, share_count: 0 }
+        statistics: statsMap.get(video.id) ?? { view_count: 0, like_count: 0, comment_count: 0, share_count: 0 },
       }))
     }
 
-    // Calculate total views
-    const totalViews = sumViews(videosWithStats)
-
     // Return merged result
-    const result = {
+    return NextResponse.json({
       cursor: listJson.data?.cursor,
       has_more: listJson.data?.has_more,
-      total_views: totalViews,
-      videos: videosWithStats
-    }
-
-    console.log('[videos] Final result:', { 
-      videoCount: videosWithStats.length, 
-      totalViews, 
-      hasMore: listJson.data?.has_more 
+      total_views: sumViews(videosWithStats),
+      videos: videosWithStats,
     })
-
-    return NextResponse.json(result)
   } catch (e: any) {
     console.error('[videos] Server error:', e)
     return NextResponse.json({ error: 'Server error', details: String(e) }, { status: 500 })
