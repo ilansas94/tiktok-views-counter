@@ -119,7 +119,7 @@ export function Leaderboard({ currentUser }: LeaderboardProps) {
            </p>
            {currentUser ? (
              <div className="text-sm text-gray-400 mb-4">
-               You're logged in as {currentUser.display_name} - submit your views above!
+                               You&apos;re logged in as {currentUser.display_name} - submit your views above!
              </div>
            ) : (
              <Link href="/auth/login" className="btn-primary">
@@ -189,7 +189,7 @@ export function Leaderboard({ currentUser }: LeaderboardProps) {
              <div className="text-center mt-8 pt-6 border-t border-gray-700/50">
          {currentUser ? (
            <p className="text-sm text-gray-400 mb-4">
-             You're logged in as {currentUser.display_name} - submit your views above to join the leaderboard!
+                           You&apos;re logged in as {currentUser.display_name} - submit your views above to join the leaderboard!
            </p>
          ) : (
            <>
