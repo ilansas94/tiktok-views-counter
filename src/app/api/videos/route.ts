@@ -1,6 +1,17 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { cookies } from 'next/headers'
 
+// Default fields to request from TikTok API
+const defaultFields = [
+  'id',
+  'title',
+  'create_time',
+  'duration',
+  'cover_image_url',
+  'share_url',
+  'statistics'
+]
+
 export async function POST(request: NextRequest) {
   if (request.method !== 'POST') {
     return NextResponse.json({ error: 'Method not allowed' }, { status: 405 })
@@ -9,6 +20,8 @@ export async function POST(request: NextRequest) {
   try {
     const cookieStore = cookies()
     const cookieAccess = cookieStore.get('tt_access')?.value
+    
+    // Parse body from request, with fallback to empty object
     const body = await request.json().catch(() => ({}))
     const { access_token = cookieAccess, cursor = 0, max_count = 20, fields: clientFields } = body
 
@@ -16,18 +29,10 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Missing access_token (cookie or body)' }, { status: 400 })
     }
 
-    // Use client fields if provided, otherwise use default fields
+    // Set fields - use client fields if provided, otherwise use default fields
     const fields = Array.isArray(clientFields) && clientFields.length
       ? clientFields
-      : [
-          'id',
-          'title',
-          'create_time',
-          'duration',
-          'cover_image_url',
-          'share_url',
-          'statistics', // contains view_count, like_count, etc.
-        ]
+      : defaultFields
 
     const tiktok = await fetch('https://open.tiktokapis.com/v2/video/list/', {
       method: 'POST',
@@ -38,7 +43,7 @@ export async function POST(request: NextRequest) {
       body: JSON.stringify({
         cursor: Number(cursor) || 0,
         max_count: Number(max_count) || 20,
-        fields, // <-- required
+        fields
       })
     })
 
