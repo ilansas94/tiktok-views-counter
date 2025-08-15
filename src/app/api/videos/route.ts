@@ -26,7 +26,7 @@ export async function POST(request: NextRequest) {
       // Try without username parameter first
       const requestBody = {
         max_count: 20,
-        fields: ['id', 'title', 'view_count', 'like_count', 'comment_count', 'share_count'],
+        fields: '["id","title","view_count","like_count","comment_count","share_count"]',
         ...(cursor && { cursor })
       }
 
