@@ -379,7 +379,11 @@ export default function Home() {
           </div>
           
           <div className="flex justify-center">
-            <AuthenticatedViewsCard />
+            {!isAuthLoading && !userInfo ? (
+              <ViewsCard />
+            ) : (
+              <AuthenticatedViewsCard />
+            )}
           </div>
         </div>
       </section>
