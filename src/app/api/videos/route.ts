@@ -22,24 +22,12 @@ export async function POST(request: NextRequest) {
       requestCount++
       console.log(`Making video list request #${requestCount}`)
 
-      // Prepare request body
-      const requestBody: any = {
-        max_count: 20
-      }
-      
-      if (cursor) {
-        requestBody.cursor = cursor
-      }
-
-      console.log('Video API request body:', requestBody)
-
+      // Use the correct TikTok video list endpoint
       const response = await fetch('https://open.tiktokapis.com/v2/video/list/', {
-        method: 'POST',
+        method: 'GET',
         headers: {
           'Authorization': `Bearer ${accessToken}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(requestBody)
+        }
       })
 
       console.log('Video API response status:', response.status, response.statusText)
