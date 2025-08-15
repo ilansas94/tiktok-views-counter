@@ -66,8 +66,8 @@ async function fetchVideos(accessToken: string): Promise<{ totalViews: number; v
   try {
     console.log('Starting video fetch with access token')
 
-    // Try the original videos route first
-    let response = await fetch('/api/videos', {
+    // Try the new tiktok-videos route first
+    let response = await fetch('/api/tiktok-videos', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -75,9 +75,21 @@ async function fetchVideos(accessToken: string): Promise<{ totalViews: number; v
       body: JSON.stringify({ accessToken })
     })
 
-    // If the original route fails, try the alternative route
+    // If the new route fails, try the original videos route
     if (!response.ok && response.status === 404) {
-      console.log('Original videos route failed, trying alternative route')
+      console.log('TikTok-videos route failed, trying original videos route')
+      response = await fetch('/api/videos', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ accessToken })
+      })
+    }
+
+    // If both fail, try the get-videos route
+    if (!response.ok && response.status === 404) {
+      console.log('Original videos route failed, trying get-videos route')
       response = await fetch('/api/get-videos', {
         method: 'POST',
         headers: {
