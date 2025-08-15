@@ -22,7 +22,7 @@ export async function POST(request: NextRequest) {
       requestCount++
       console.log(`Making video list request #${requestCount}`)
 
-      // Use the correct TikTok video list endpoint
+      // Use the correct TikTok video list endpoint with GET method
       const response = await fetch('https://open.tiktokapis.com/v2/video/list/', {
         method: 'GET',
         headers: {
