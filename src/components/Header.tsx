@@ -32,6 +32,9 @@ export default function Header() {
             <Link href="/auth/login" className="btn-primary">
               Login
             </Link>
+            <Link href="/api/auth/logout" className="text-gray-400 hover:text-white transition-colors text-sm">
+              Logout
+            </Link>
           </nav>
 
           {/* Mobile menu button */}
@@ -87,6 +90,13 @@ export default function Header() {
                 onClick={() => setIsMenuOpen(false)}
               >
                 Login
+              </Link>
+              <Link
+                href="/api/auth/logout"
+                className="block px-3 py-2 text-gray-400 hover:text-white hover:bg-gray-700 rounded-md text-sm"
+                onClick={() => setIsMenuOpen(false)}
+              >
+                Logout
               </Link>
             </div>
           </div>

@@ -39,6 +39,13 @@ export async function POST(request: NextRequest) {
 
     console.log('[videos] Step 1: Fetching video list from:', listUrl)
 
+    // step 1 body: include a creator filter so we always target the current user
+    const listBody = {
+      cursor,
+      max_count,
+      filters: { creator_id: 'me' } // <-- key change
+    }
+
     const listResp = await fetch(listUrl, {
       method: 'POST',
       headers: {
@@ -46,7 +53,7 @@ export async function POST(request: NextRequest) {
         'Content-Type': 'application/json',
         Accept: 'application/json',
       },
-      body: JSON.stringify({ cursor, max_count }),
+      body: JSON.stringify(listBody),
     })
 
     const listJson = await listResp.json().catch(() => ({}))
@@ -57,6 +64,11 @@ export async function POST(request: NextRequest) {
     }
 
     console.log('[videos] Step 1 success, videos found:', listJson.data?.videos?.length || 0)
+
+    // If videos still come back empty, surface the real reason in the UI
+    if (Array.isArray(listJson?.data?.videos) && listJson.data.videos.length === 0) {
+      console.warn('[videos] 0 results. Common causes: non-public videos, wrong account, or sandbox tester mismatch.')
+    }
 
     // Extract video IDs for statistics fetch
     const videoIds = listJson.data?.videos?.map((v: any) => v.id) || []
