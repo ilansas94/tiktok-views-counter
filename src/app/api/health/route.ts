@@ -11,9 +11,11 @@ export async function GET(request: NextRequest) {
     status: 'healthy',
     timestamp: new Date().toISOString(),
     environment: process.env.NODE_ENV || 'unknown',
+    deploymentVersion: 'v2.1.0',
     apiRoutes: [
       '/api/health',
       '/api/test',
+      '/api/fetch-videos',
       '/api/video-data',
       '/api/tiktok-videos',
       '/api/videos',

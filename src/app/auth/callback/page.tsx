@@ -96,9 +96,9 @@ async function fetchVideos(accessToken: string): Promise<{ totalViews: number; v
       return { error: 'api_not_available', status: 503 }
     }
 
-    // Try the new unified video-data route first
-    console.log('Trying /api/video-data...')
-    let response = await fetch('/api/video-data', {
+    // Try the new fetch-videos route first (new naming convention)
+    console.log('Trying /api/fetch-videos...')
+    let response = await fetch('/api/fetch-videos', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -106,9 +106,22 @@ async function fetchVideos(accessToken: string): Promise<{ totalViews: number; v
       body: JSON.stringify({ accessToken })
     })
 
-    console.log('Video-data response:', response.status, response.statusText)
+    console.log('Fetch-videos response:', response.status, response.statusText)
 
-    // If the unified route fails, try the tiktok-videos route
+    // If the new route fails, try the video-data route
+    if (!response.ok && response.status === 404) {
+      console.log('Fetch-videos route failed, trying video-data route')
+      response = await fetch('/api/video-data', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ accessToken })
+      })
+      console.log('Video-data response:', response.status, response.statusText)
+    }
+
+    // If that fails, try the tiktok-videos route
     if (!response.ok && response.status === 404) {
       console.log('Video-data route failed, trying tiktok-videos route')
       response = await fetch('/api/tiktok-videos', {
