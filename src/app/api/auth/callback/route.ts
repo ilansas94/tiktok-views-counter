@@ -6,10 +6,7 @@ export async function GET(request: NextRequest) {
     const code = searchParams.get('code')
     
     if (!code) {
-      return new Response(
-        `<pre>Missing code parameter</pre>`,
-        { status: 400, headers: { 'Content-Type': 'text/html' } }
-      )
+      return NextResponse.json({ error: 'Missing code parameter' }, { status: 400 })
     }
 
     const r = await fetch('https://open.tiktokapis.com/v2/oauth/token/', {
@@ -27,14 +24,14 @@ export async function GET(request: NextRequest) {
     const data = await r.json()
 
     if (!r.ok) {
-      return new Response(
-        `<pre>Token exchange failed:\n${JSON.stringify(data, null, 2)}</pre>`,
-        { status: r.status, headers: { 'Content-Type': 'text/html' } }
-      )
+      return NextResponse.json({ 
+        error: 'Token exchange failed', 
+        details: data 
+      }, { status: r.status })
     }
 
     const maxAge = (data.expires_in || 3600).toString()
-    const response = NextResponse.redirect(new URL('/auth/callback', request.url))
+    const response = NextResponse.redirect(new URL('/', request.url))
     
     response.cookies.set('tt_access', data.access_token, {
       path: '/',
@@ -54,9 +51,9 @@ export async function GET(request: NextRequest) {
 
     return response
   } catch (e) {
-    return new Response(
-      `<pre>Callback error:\n${String(e)}</pre>`,
-      { status: 500, headers: { 'Content-Type': 'text/html' } }
-    )
+    return NextResponse.json({ 
+      error: 'Callback error', 
+      details: String(e) 
+    }, { status: 500 })
   }
 }

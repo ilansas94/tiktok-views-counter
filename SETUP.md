@@ -8,18 +8,18 @@ Create a `.env.local` file in the root directory with the following variables:
 
 ```env
 # TikTok OAuth Configuration
-TIKTOK_CLIENT_KEY=YOUR_KEY
-TIKTOK_CLIENT_SECRET=YOUR_SECRET
-TIKTOK_REDIRECT_URI=https://tiktok-views-counter.vercel.app/auth/callback
+TIKTOK_CLIENT_KEY=sbawj6b8kbbaolv5bp
+TIKTOK_CLIENT_SECRET=vaOGHa6vl6n88vyS6KPeSTzBf3Q0IPEd
+TIKTOK_REDIRECT_URI=https://tiktok-views-counter.vercel.app/api/auth/callback
 
 # App Configuration (Public)
 NEXT_PUBLIC_APP_BASE_URL=https://tiktok-views-counter.vercel.app
 
 # TikTok Client Key (Public - needed for client-side OAuth)
-NEXT_PUBLIC_TIKTOK_CLIENT_KEY=YOUR_KEY
+NEXT_PUBLIC_TIKTOK_CLIENT_KEY=sbawj6b8kbbaolv5bp
 
 # TikTok API Scopes (Public)
-NEXT_PUBLIC_TIKTOK_SCOPES=user.info.basic,video.list
+NEXT_PUBLIC_TIKTOK_SCOPES=user.info.basic,video.list,user.info.profile
 ```
 
 ### 2. Vercel Deployment
@@ -43,8 +43,8 @@ Add the same environment variables in your Vercel project:
 
 In your TikTok app settings:
 
-1. Set **Redirect URI** to: `https://tiktok-views-counter.vercel.app/auth/callback`
-2. Ensure **Scopes** include: `user.info.basic` and `video.list`
+1. Set **Redirect URI** to: `https://tiktok-views-counter.vercel.app/api/auth/callback`
+2. Ensure **Scopes** include: `user.info.basic`, `video.list`, and `user.info.profile`
 3. Add your domain to the allowed domains list
 
 ### 3. Sandbox Testing
@@ -85,7 +85,7 @@ In your TikTok app settings:
 
 - **400 Bad Request**: Check environment variables and TikTok app configuration
 - **Missing cookies**: Verify OAuth callback is working properly
-- **Scope errors**: Ensure `user.info.basic,video.list` scopes are configured
+- **Scope errors**: Ensure `user.info.basic,video.list,user.info.profile` scopes are configured
 
 ## API Endpoints
 

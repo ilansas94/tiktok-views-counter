@@ -102,6 +102,12 @@ function AuthenticatedViewsCard() {
             </div>
           </div>
         )}
+
+        <div className="mt-4">
+          <Link href="/auth/login" className="btn-primary w-full block">
+            Login with TikTok
+          </Link>
+        </div>
       </div>
     </div>
   )

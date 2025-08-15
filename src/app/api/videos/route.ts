@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { cookies } from 'next/headers'
 
 export async function POST(request: NextRequest) {
   if (request.method !== 'POST') {
@@ -6,8 +7,8 @@ export async function POST(request: NextRequest) {
   }
 
   try {
-    const cookie = request.headers.get('cookie') || ''
-    const cookieAccess = (cookie.match(/(?:^|;\s*)tt_access=([^;]+)/) || [])[1]
+    const cookieStore = cookies()
+    const cookieAccess = cookieStore.get('tt_access')?.value
     const { access_token = cookieAccess, cursor = 0, max_count = 20 } = await request.json() || {}
 
     if (!access_token) {
@@ -17,7 +18,7 @@ export async function POST(request: NextRequest) {
     const tiktok = await fetch('https://open.tiktokapis.com/v2/video/list/', {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${decodeURIComponent(access_token)}`,
+        'Authorization': `Bearer ${access_token}`,
         'Content-Type': 'application/json'
       },
       body: JSON.stringify({ cursor: Number(cursor) || 0, max_count: Number(max_count) || 20 })
