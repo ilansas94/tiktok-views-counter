@@ -343,78 +343,50 @@ export default function Home() {
               <span className="gradient-text">in one number.</span>
             </h1>
             
-            <p className="text-xl md:text-2xl text-gray-300 mb-8 max-w-3xl mx-auto animate-slide-up">
-              Connect your account to see the sum of views across all your videos.
-            </p>
-            
             {!isAuthLoading && !userInfo && (
-              <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-16 animate-slide-up">
-                <Link href="/auth/login" className="btn-primary text-lg px-8 py-4">
-                  Login with TikTok
-                </Link>
-                <span className="text-gray-400 text-sm">
-                  Free • No data stored • Secure OAuth
-                </span>
-              </div>
+              <>
+                <p className="text-xl md:text-2xl text-gray-300 mb-8 max-w-3xl mx-auto animate-slide-up">
+                  Connect your account to see the sum of views across all your videos.
+                </p>
+                <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-16 animate-slide-up">
+                  <Link href="/auth/login" className="btn-primary text-lg px-8 py-4">
+                    Login with TikTok
+                  </Link>
+                  <span className="text-gray-400 text-sm">
+                    Free • No data stored • Secure OAuth
+                  </span>
+                </div>
+              </>
             )}
             
             {!isAuthLoading && userInfo && (
-              <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-16 animate-slide-up">
-                <div className="flex items-center space-x-3">
-                  <div className="w-12 h-12 rounded-full border-2 border-tiktok-primary overflow-hidden bg-gray-700 flex items-center justify-center">
-                    {userInfo.avatar_url ? (
-                      <img 
-                        src={`/api/avatar?url=${encodeURIComponent(userInfo.avatar_url)}`}
-                        alt={userInfo.display_name}
-                        className="w-full h-full object-cover"
-                        onError={(e) => {
-                          // Fallback to initials if image fails to load
-                          const target = e.target as HTMLImageElement;
-                          target.style.display = 'none';
-                          const parent = target.parentElement;
-                          if (parent) {
-                            parent.innerHTML = `<div class="text-white font-bold text-lg">${userInfo.display_name?.charAt(0) || 'U'}</div>`;
-                          }
-                        }}
-                      />
-                    ) : (
-                      <div className="text-white font-bold text-lg">
-                        {userInfo.display_name?.charAt(0) || 'U'}
-                      </div>
-                    )}
-                  </div>
-                  <div className="text-left">
-                    <div className="text-white font-semibold">{userInfo.display_name}</div>
-                    <div className="text-gray-400 text-sm">Welcome, {userInfo.display_name}!</div>
-                  </div>
-                </div>
+              <div className="flex justify-center mt-12 animate-slide-up">
+                <AuthenticatedViewsCard />
               </div>
             )}
           </div>
         </div>
       </section>
 
-      {/* Data Section */}
-      <section className="py-16 bg-tiktok-dark-light">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl md:text-4xl font-bold mb-4">
-              See Your Total Views
-            </h2>
-            <p className="text-gray-300 text-lg">
-              Connect your account to see your actual total views
-            </p>
-          </div>
-          
-          <div className="flex justify-center">
-            {!isAuthLoading && !userInfo ? (
+      {/* Data Section - Only for non-authenticated users */}
+      {!isAuthLoading && !userInfo && (
+        <section className="py-16 bg-tiktok-dark-light">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="text-center mb-12">
+              <h2 className="text-3xl md:text-4xl font-bold mb-4">
+                See Your Total Views
+              </h2>
+              <p className="text-gray-300 text-lg">
+                Connect your account to see your actual total views
+              </p>
+            </div>
+            
+            <div className="flex justify-center">
               <ViewsCard />
-            ) : (
-              <AuthenticatedViewsCard />
-            )}
+            </div>
           </div>
-        </div>
-      </section>
+        </section>
+      )}
 
       {/* How It Works Section */}
       <HowItWorks />
