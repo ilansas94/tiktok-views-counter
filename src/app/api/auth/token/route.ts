@@ -60,12 +60,24 @@ export async function POST(request: NextRequest) {
     console.log('Full redirect URI being sent to TikTok:', tokenRequestBody.redirect_uri)
     console.log('Expected redirect URI format:', `${baseUrl}/auth/callback`)
 
+    // Convert the request body to URL-encoded format as required by TikTok
+    const formData = new URLSearchParams()
+    formData.append('client_key', clientKey)
+    formData.append('client_secret', clientSecret)
+    formData.append('code', code)
+    formData.append('grant_type', 'authorization_code')
+    formData.append('redirect_uri', `${baseUrl}/auth/callback`)
+    
+    if (codeVerifier) {
+      formData.append('code_verifier', codeVerifier)
+    }
+
     const response = await fetch('https://open.tiktokapis.com/v2/oauth/token/', {
       method: 'POST',
       headers: {
-        'Content-Type': 'application/json',
+        'Content-Type': 'application/x-www-form-urlencoded',
       },
-      body: JSON.stringify(tokenRequestBody)
+      body: formData.toString()
     })
 
     console.log('TikTok API response status:', response.status, response.statusText)
