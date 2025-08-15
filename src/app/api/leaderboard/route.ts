@@ -1,18 +1,56 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { promises as fs } from 'fs'
+import path from 'path'
 
-// In-memory storage for demo purposes
-// In production, this would be a database
-let leaderboardData: Array<{
+// File path for persistent storage
+const LEADERBOARD_FILE = path.join(process.cwd(), 'data', 'leaderboard.json')
+
+// Ensure data directory exists
+async function ensureDataDirectory() {
+  const dataDir = path.dirname(LEADERBOARD_FILE)
+  try {
+    await fs.access(dataDir)
+  } catch {
+    await fs.mkdir(dataDir, { recursive: true })
+  }
+}
+
+// Load leaderboard data from file
+async function loadLeaderboardData(): Promise<Array<{
   username: string
   display_name: string
   total_views: number
   video_count: number
   avatar_url?: string
   submitted_at: string
-}> = []
+}>> {
+  try {
+    await ensureDataDirectory()
+    const data = await fs.readFile(LEADERBOARD_FILE, 'utf-8')
+    return JSON.parse(data)
+  } catch (error) {
+    // If file doesn't exist or is invalid, return empty array
+    return []
+  }
+}
+
+// Save leaderboard data to file
+async function saveLeaderboardData(data: Array<{
+  username: string
+  display_name: string
+  total_views: number
+  video_count: number
+  avatar_url?: string
+  submitted_at: string
+}>) {
+  await ensureDataDirectory()
+  await fs.writeFile(LEADERBOARD_FILE, JSON.stringify(data, null, 2))
+}
 
 export async function GET() {
   try {
+    const leaderboardData = await loadLeaderboardData()
+    
     // Sort by total views descending and return top 50
     const sortedData = [...leaderboardData]
       .sort((a, b) => b.total_views - a.total_views)
@@ -49,6 +87,9 @@ export async function POST(request: NextRequest) {
       )
     }
 
+    // Load current leaderboard data
+    const leaderboardData = await loadLeaderboardData()
+
     // Check if user already exists in leaderboard
     const existingIndex = leaderboardData.findIndex(entry => entry.username === username)
     
@@ -78,6 +119,9 @@ export async function POST(request: NextRequest) {
 
     // Sort leaderboard by total views
     leaderboardData.sort((a, b) => b.total_views - a.total_views)
+
+    // Save updated data to file
+    await saveLeaderboardData(leaderboardData)
 
     return NextResponse.json({
       success: true,
