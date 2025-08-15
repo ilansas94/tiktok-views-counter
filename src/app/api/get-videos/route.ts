@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 
 export async function POST(request: NextRequest) {
-  console.log('=== VIDEOS API ROUTE CALLED ===')
+  console.log('=== GET-VIDEOS API ROUTE CALLED ===')
   
   try {
     const body = await request.json()
@@ -11,15 +11,15 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Access token required' }, { status: 400 })
     }
 
-    // For now, return sample data to test if the route is working
+    // Return sample data for testing
     return NextResponse.json({ 
-      totalViews: 12345678,
-      videoCount: 42,
-      message: 'Sample data - API route working'
+      totalViews: 9876543,
+      videoCount: 15,
+      message: 'Sample data from get-videos route'
     })
     
   } catch (error) {
-    console.error('Error in videos API route:', error)
+    console.error('Error in get-videos API route:', error)
     return NextResponse.json({ 
       error: 'Internal server error',
       details: error instanceof Error ? error.message : 'Unknown error'
@@ -29,7 +29,7 @@ export async function POST(request: NextRequest) {
 
 export async function GET() {
   return NextResponse.json({ 
-    message: 'Videos API endpoint is working',
+    message: 'Get-videos API endpoint is working',
     status: 'success'
   })
 }

@@ -66,13 +66,26 @@ async function fetchVideos(accessToken: string): Promise<{ totalViews: number; v
   try {
     console.log('Starting video fetch with access token')
 
-    const response = await fetch('/api/videos', {
+    // Try the original videos route first
+    let response = await fetch('/api/videos', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({ accessToken })
     })
+
+    // If the original route fails, try the alternative route
+    if (!response.ok && response.status === 404) {
+      console.log('Original videos route failed, trying alternative route')
+      response = await fetch('/api/get-videos', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ accessToken })
+      })
+    }
 
     console.log('Video API response status:', response.status, response.statusText)
     console.log('Video API response headers:', Object.fromEntries(response.headers.entries()))
