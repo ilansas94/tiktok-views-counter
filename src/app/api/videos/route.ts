@@ -49,6 +49,15 @@ export async function POST(request: NextRequest) {
       }
 
       const data = await response.json()
+      
+      // Check if the response contains an error
+      if (data.error) {
+        console.error('TikTok API returned error:', data.error)
+        return NextResponse.json({ 
+          error: 'TikTok API error',
+          details: data.error
+        }, { status: 400 })
+      }
       console.log('Video list response:', {
         videoCount: data.data?.videos?.length || 0,
         hasMore: data.data?.has_more || false,
