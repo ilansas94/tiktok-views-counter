@@ -141,6 +141,36 @@ function AuthenticatedViewsCard() {
   return (
     <div className="card max-w-md w-full">
       <div className="text-center">
+        {!isAuthLoading && userInfo && (
+          <div className="mb-4">
+            <div className="w-16 h-16 mx-auto rounded-full border-2 border-tiktok-primary overflow-hidden bg-gray-700 flex items-center justify-center">
+              {userInfo.avatar_url ? (
+                <img 
+                  src={`/api/avatar?url=${encodeURIComponent(userInfo.avatar_url)}`}
+                  alt={userInfo.display_name}
+                  className="w-full h-full object-cover"
+                  onError={(e) => {
+                    // Fallback to initials if image fails to load
+                    const target = e.target as HTMLImageElement;
+                    target.style.display = 'none';
+                    const parent = target.parentElement;
+                    if (parent) {
+                      parent.innerHTML = `<div class="text-white font-bold text-lg">${userInfo.display_name?.charAt(0) || 'U'}</div>`;
+                    }
+                  }}
+                />
+              ) : (
+                <div className="text-white font-bold text-lg">
+                  {userInfo.display_name?.charAt(0) || 'U'}
+                </div>
+              )}
+            </div>
+            <div className="text-sm text-gray-400 mt-2">
+              {userInfo.display_name}
+            </div>
+          </div>
+        )}
+        
         <h3 className="text-lg font-semibold text-gray-300 mb-2">
           Total Views
         </h3>
@@ -255,9 +285,6 @@ function AuthenticatedViewsCard() {
         
         {!isAuthLoading && userInfo && (
           <div className="mt-4">
-            <div className="text-sm text-gray-400 mb-2">
-              Logged in as: {userInfo.display_name}
-            </div>
             <button
               onClick={handleLogout}
               className="btn-secondary w-full block"
