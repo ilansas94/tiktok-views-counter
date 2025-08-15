@@ -8,6 +8,10 @@ export async function GET(req: NextRequest) {
   const state = url.searchParams.get('state') || '';
   const redirectUri = `${origin}/api/auth/callback`;
   
+  // Log granted scopes from TikTok
+  const granted = url.searchParams.get('granted_scopes') ?? '';
+  console.log('TikTok granted_scopes:', granted);
+  
   if (!code) {
     if (state.includes('debug')) {
       return NextResponse.json({ ok: false, step: 'no_code' }, { status: 400 });

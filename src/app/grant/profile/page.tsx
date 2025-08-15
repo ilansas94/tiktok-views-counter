@@ -1,12 +1,12 @@
 'use client';
 import { useEffect, useState } from 'react';
-import { buildTikTokLoginURL } from '@/lib/tiktokLogin';
+import { buildTikTokAuthorizeUrl } from '@/lib/tiktokAuth';
 
 export default function GrantProfile() {
   const [href, setHref] = useState('');
   
   useEffect(() => {
-    setHref(buildTikTokLoginURL(window.location.origin, 'profile-consent'));
+    setHref(buildTikTokAuthorizeUrl());
   }, []);
   
   return (

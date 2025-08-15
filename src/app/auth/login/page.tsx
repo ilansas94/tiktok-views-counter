@@ -3,31 +3,23 @@
 import { useEffect, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
+import { buildTikTokAuthorizeUrl } from '@/lib/tiktokAuth'
 
 function LoginComponent() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const clientKey = process.env.NEXT_PUBLIC_TIKTOK_CLIENT_KEY
-  const scopes = process.env.NEXT_PUBLIC_TIKTOK_SCOPES
   const isDebug = searchParams.get('debug') === 'true'
 
   useEffect(() => {
     const handleAuth = async () => {
       if (clientKey) {
         try {
-          // Generate state parameter - use 'debug' for debugging, random for production
-          const state = isDebug ? 'debug' : Math.random().toString(36).substring(7)
-          
-          // Construct TikTok OAuth URL
-          const authUrl = new URL('https://www.tiktok.com/v2/auth/authorize/')
-          authUrl.searchParams.set('client_key', clientKey)
-          authUrl.searchParams.set('response_type', 'code')
-          authUrl.searchParams.set('scope', 'user.info.basic,video.list')
-          authUrl.searchParams.set('redirect_uri', `${window.location.origin}/api/auth/callback`)
-          authUrl.searchParams.set('state', state)
+          // Use the environment-driven helper
+          const authorizeUrl = buildTikTokAuthorizeUrl();
           
           // Redirect to TikTok OAuth
-          window.location.href = authUrl.toString()
+          window.location.href = authorizeUrl;
         } catch (error) {
           console.error('Error generating auth URL:', error)
         }
@@ -35,7 +27,7 @@ function LoginComponent() {
     }
 
     handleAuth()
-  }, [clientKey, scopes, router, isDebug])
+  }, [clientKey, router, isDebug])
 
   // If clientKey is missing, render error message
   if (!clientKey) {
