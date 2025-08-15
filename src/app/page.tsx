@@ -326,10 +326,10 @@ function AuthenticatedViewsCard() {
                       type: 'success',
                       isVisible: true
                     })
-                    // Refresh the page after 2 seconds to show updated leaderboard
+                    // Refresh the page after 3 seconds to show updated leaderboard
                     setTimeout(() => {
                       window.location.reload()
-                    }, 2000)
+                    }, 3000)
                   } else {
                     setToast({
                       message: `Unable to submit to leaderboard: ${data.error}`,
