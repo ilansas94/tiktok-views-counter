@@ -47,9 +47,11 @@ export async function POST(request: NextRequest) {
       requestCount++
       console.log(`Making video list request #${requestCount}`)
 
+      // Try with the test username from sandbox settings
       const requestBody = {
         max_count: 20,
         fields: ['id', 'title', 'view_count', 'like_count', 'comment_count', 'share_count'],
+        username: 'ad1ix', // Use the test username from sandbox settings
         ...(cursor && { cursor })
       }
 
