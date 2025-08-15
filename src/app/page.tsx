@@ -14,39 +14,49 @@ export default function Home() {
           }}></div>
         </div>
         
-        <div className="relative z-10 container mx-auto px-4 py-20">
+        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24">
           <div className="text-center">
-            <h1 className="text-5xl md:text-7xl font-bold text-white mb-6">
-              Track Your TikTok Success
+            <h1 className="text-4xl md:text-6xl font-bold mb-6 animate-fade-in">
+              Total views across your TikTok —{' '}
+              <span className="gradient-text">in one number.</span>
             </h1>
-            <p className="text-xl text-gray-300 mb-8 max-w-2xl mx-auto">
-              Connect your TikTok account and see the total views across all your videos in one place. 
-              Get insights into your content performance with our easy-to-use dashboard.
+            
+            <p className="text-xl md:text-2xl text-gray-300 mb-8 max-w-3xl mx-auto animate-slide-up">
+              Connect your account to see the sum of views across all your videos.
             </p>
             
-            <Link 
-              href="/auth/login" 
-              className="btn-primary text-lg px-8 py-4 inline-block"
-            >
-              Connect TikTok Account
-            </Link>
+            <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-16 animate-slide-up">
+              <Link href="/auth/login" className="btn-primary text-lg px-8 py-4">
+                Login with TikTok
+              </Link>
+              <span className="text-gray-400 text-sm">
+                Free • No data stored • Secure OAuth
+              </span>
+            </div>
           </div>
         </div>
       </section>
 
-      {/* Views Card Section */}
-      <section className="py-16 bg-tiktok-dark">
-        <div className="container mx-auto px-4">
-          <ViewsCard />
+      {/* Sample Data Section */}
+      <section className="py-16 bg-tiktok-dark-light">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl md:text-4xl font-bold mb-4">
+              See Your Total Views
+            </h2>
+            <p className="text-gray-300 text-lg">
+              Preview of what you&apos;ll see after connecting your account
+            </p>
+          </div>
+          
+          <div className="flex justify-center">
+            <ViewsCard />
+          </div>
         </div>
       </section>
 
       {/* How It Works Section */}
-      <section className="py-16 bg-tiktok-dark-light">
-        <div className="container mx-auto px-4">
-          <HowItWorks />
-        </div>
-      </section>
+      <HowItWorks />
     </div>
   )
 }

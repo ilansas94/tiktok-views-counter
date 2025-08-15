@@ -28,9 +28,10 @@ async function exchangeCodeForToken(code: string): Promise<string | null> {
     // Get the code verifier from session storage
     const codeVerifier = getCodeVerifier()
 
-    console.log('Starting token exchange process...')
-    console.log('Code verifier found:', !!codeVerifier)
-    console.log('Code length:', code.length)
+    console.log('Attempting token exchange with:', {
+      code: code.substring(0, 10) + '...',
+      hasCodeVerifier: !!codeVerifier
+    })
 
     const response = await fetch('/api/auth/token', {
       method: 'POST',
@@ -43,8 +44,6 @@ async function exchangeCodeForToken(code: string): Promise<string | null> {
       })
     })
 
-    console.log('Token API response status:', response.status, response.statusText)
-
     if (!response.ok) {
       const errorData = await response.json()
       console.error('Token exchange failed:', errorData)
@@ -52,10 +51,7 @@ async function exchangeCodeForToken(code: string): Promise<string | null> {
     }
 
     const data = await response.json()
-    console.log('Token exchange successful, response keys:', Object.keys(data))
-    console.log('Access token present:', !!data.access_token)
-    console.log('Access token length:', data.access_token?.length || 0)
-    console.log('Access token value:', data.access_token ? data.access_token.substring(0, 20) + '...' : 'NULL')
+    console.log('Token exchange successful, access token received')
     return data.access_token
   } catch (error) {
     console.error('Error exchanging code for token:', error)
@@ -63,42 +59,11 @@ async function exchangeCodeForToken(code: string): Promise<string | null> {
   }
 }
 
-async function testApiEndpoints(): Promise<{ working: boolean; details: any }> {
-  try {
-    console.log('Testing API endpoints...')
-    
-    // Test health check endpoint first
-    const healthResponse = await fetch('/api/health')
-    console.log('Health check response:', healthResponse.status, healthResponse.statusText)
-    
-    if (healthResponse.ok) {
-      const healthData = await healthResponse.json()
-      console.log('Health check data:', healthData)
-      return { working: true, details: healthData }
-    }
-    
-    return { working: false, details: { status: healthResponse.status, statusText: healthResponse.statusText } }
-  } catch (error) {
-    console.error('Error testing API endpoints:', error)
-    return { working: false, details: error }
-  }
-}
-
-async function fetchVideos(accessToken: string): Promise<{ totalViews: number; videoCount: number; message?: string } | { error: string; status: number } | null> {
+async function fetchVideos(accessToken: string): Promise<{ totalViews: number; videoCount: number } | null> {
   try {
     console.log('Starting video fetch with access token')
-    console.log('Access token value:', accessToken ? accessToken.substring(0, 20) + '...' : 'NULL')
 
-    // First, test if API endpoints are working
-    const apiTest = await testApiEndpoints()
-    if (!apiTest.working) {
-      console.error('API endpoints not working:', apiTest.details)
-      return { error: 'api_not_available', status: 503 }
-    }
-
-    // Try the new fetch-videos route first (new naming convention)
-    console.log('Trying /api/fetch-videos...')
-    let response = await fetch('/api/fetch-videos', {
+    const response = await fetch('/api/videos', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -106,89 +71,10 @@ async function fetchVideos(accessToken: string): Promise<{ totalViews: number; v
       body: JSON.stringify({ accessToken })
     })
 
-    console.log('Fetch-videos response:', response.status, response.statusText)
-
-    // If the new route fails, try the video-data route
-    if (!response.ok && response.status === 404) {
-      console.log('Fetch-videos route failed, trying video-data route')
-      response = await fetch('/api/video-data', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ accessToken })
-      })
-      console.log('Video-data response:', response.status, response.statusText)
-    }
-
-    // If that fails, try the tiktok-videos route
-    if (!response.ok && response.status === 404) {
-      console.log('Video-data route failed, trying tiktok-videos route')
-      response = await fetch('/api/tiktok-videos', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ accessToken })
-      })
-      console.log('TikTok-videos response:', response.status, response.statusText)
-    }
-
-    // If that fails, try the original videos route
-    if (!response.ok && response.status === 404) {
-      console.log('TikTok-videos route failed, trying original videos route')
-      response = await fetch('/api/videos', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ accessToken })
-      })
-      console.log('Videos response:', response.status, response.statusText)
-    }
-
-    // If all fail, try the get-videos route
-    if (!response.ok && response.status === 404) {
-      console.log('Original videos route failed, trying get-videos route')
-      response = await fetch('/api/get-videos', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ accessToken })
-      })
-      console.log('Get-videos response:', response.status, response.statusText)
-    }
-
-    console.log('Final video API response status:', response.status, response.statusText)
-    console.log('Video API response headers:', Object.fromEntries(response.headers.entries()))
-
     if (!response.ok) {
-      let errorData
-      try {
-        errorData = await response.json()
-      } catch (parseError) {
-        const errorText = await response.text()
-        errorData = { error: 'Failed to parse error response', details: errorText }
-      }
-      
-      console.error('Video fetch failed:', {
-        status: response.status,
-        statusText: response.statusText,
-        error: errorData
-      })
-      
-      // Return error info for 401 (expected in sandbox mode)
-      if (response.status === 401) {
-        return { error: 'unauthorized', status: 401 }
-      }
-      
-      // Handle 404 specifically
-      if (response.status === 404) {
-        return { error: 'api_not_found', status: 404 }
-      }
-      
-      return { error: 'video_fetch_failed', status: response.status }
+      const errorData = await response.json()
+      console.error('Video fetch failed:', errorData)
+      return null
     }
 
     const data = await response.json()
@@ -235,48 +121,19 @@ function CallbackContent() {
       const accessToken = await exchangeCodeForToken(code)
       
       if (accessToken) {
-        console.log('Access token received, attempting to fetch videos...')
         // Fetch video data
         const videoData = await fetchVideos(accessToken)
         
-        if (videoData && 'totalViews' in videoData) {
-          console.log('Video data received successfully:', videoData)
+        if (videoData) {
           setTotalViews(videoData.totalViews)
           setVideoCount(videoData.videoCount)
-          // Check if this is real data or sample data
-          const isRealData = !!(videoData.message && videoData.message.includes('Real data'))
-          setIsLiveData(isRealData)
-          if (!isRealData) {
-            setErrorMessage('Showing sample data — TikTok API access may be limited in sandbox mode.')
-            setErrorType('sample_data')
-          }
-        } else if (videoData && 'error' in videoData) {
-          if (videoData.status === 401) {
-            console.log('Video fetch failed with 401 - expected in sandbox mode, showing sample data')
-            // Don't show error for 401 - this is expected in sandbox mode
-            setErrorMessage('Live data unavailable in sandbox mode — showing sample data instead.')
-            setErrorType('sandbox_mode')
-          } else if (videoData.status === 404) {
-            console.log('Video API endpoint not found - this may be a deployment issue')
-            setErrorMessage('API endpoint not found — this may be a temporary deployment issue. Showing sample data instead.')
-            setErrorType('api_not_found')
-          } else if (videoData.status === 503) {
-            console.log('API endpoints not available')
-            setErrorMessage('API service temporarily unavailable — showing sample data instead.')
-            setErrorType('api_unavailable')
-          } else {
-            console.log('Video fetch failed, showing sample data')
-            setErrorMessage('Unable to fetch live data — showing sample data instead.')
-            setErrorType('video_fetch_error')
-          }
+          setIsLiveData(true)
         } else {
-          console.log('Video fetch failed, showing sample data')
-          setErrorMessage('Unable to fetch live data — showing sample data instead.')
+          setErrorMessage('Unable to fetch live data — this is expected in sandbox mode. Showing sample data instead.')
           setErrorType('video_fetch_error')
         }
       } else {
-        console.log('No access token received')
-        setErrorMessage('Authentication failed — this may be due to app configuration or sandbox mode limitations. Showing sample data instead.')
+        setErrorMessage('Unable to authenticate — please check your TikTok app configuration.')
         setErrorType('token_error')
       }
 
