@@ -62,7 +62,7 @@ async function exchangeCodeForToken(code: string): Promise<string | null> {
   }
 }
 
-async function fetchVideos(accessToken: string): Promise<{ totalViews: number; videoCount: number } | { error: string; status: number } | null> {
+async function fetchVideos(accessToken: string): Promise<{ totalViews: number; videoCount: number; message?: string } | { error: string; status: number } | null> {
   try {
     console.log('Starting video fetch with access token')
 
@@ -159,7 +159,13 @@ function CallbackContent() {
           console.log('Video data received successfully:', videoData)
           setTotalViews(videoData.totalViews)
           setVideoCount(videoData.videoCount)
-          setIsLiveData(true)
+          // Check if this is real data or sample data
+          const isRealData = !!(videoData.message && videoData.message.includes('Real data'))
+          setIsLiveData(isRealData)
+          if (!isRealData) {
+            setErrorMessage('Showing sample data — TikTok API access may be limited in sandbox mode.')
+            setErrorType('sample_data')
+          }
         } else if (videoData && 'error' in videoData) {
           if (videoData.status === 401) {
             console.log('Video fetch failed with 401 - expected in sandbox mode, showing sample data')
