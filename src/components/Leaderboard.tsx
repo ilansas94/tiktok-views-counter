@@ -13,7 +13,15 @@ interface LeaderboardEntry {
   submitted_at: string
 }
 
-export function Leaderboard() {
+interface LeaderboardProps {
+  currentUser?: {
+    username: string
+    display_name: string
+    avatar_url?: string
+  } | null
+}
+
+export function Leaderboard({ currentUser }: LeaderboardProps) {
   const [leaderboardData, setLeaderboardData] = useState<LeaderboardEntry[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -99,15 +107,26 @@ export function Leaderboard() {
         <p className="text-gray-400">See who has the most total views across all their videos</p>
       </div>
 
-      {leaderboardData.length === 0 ? (
-        <div className="text-center py-12">
-          <div className="text-6xl mb-4">📊</div>
-          <h3 className="text-xl font-semibold mb-2">No submissions yet</h3>
-          <p className="text-gray-400 mb-4">Be the first to submit your total views!</p>
-          <Link href="/auth/login" className="btn-primary">
-            Login & Submit Your Views
-          </Link>
-        </div>
+             {leaderboardData.length === 0 ? (
+         <div className="text-center py-12">
+           <div className="text-6xl mb-4">📊</div>
+           <h3 className="text-xl font-semibold mb-2">No submissions yet</h3>
+           <p className="text-gray-400 mb-4">
+             {currentUser 
+               ? "Be the first to submit your total views!" 
+               : "Be the first to submit your total views!"
+             }
+           </p>
+           {currentUser ? (
+             <div className="text-sm text-gray-400 mb-4">
+               You're logged in as {currentUser.display_name} - submit your views above!
+             </div>
+           ) : (
+             <Link href="/auth/login" className="btn-primary">
+               Login & Submit Your Views
+             </Link>
+           )}
+         </div>
       ) : (
         <div className="space-y-3">
           {leaderboardData.map((entry) => (
@@ -167,14 +186,22 @@ export function Leaderboard() {
         </div>
       )}
 
-      <div className="text-center mt-8 pt-6 border-t border-gray-700/50">
-        <p className="text-sm text-gray-400 mb-4">
-          Want to see your ranking? Login and submit your total views!
-        </p>
-        <Link href="/auth/login" className="btn-primary">
-          Join the Leaderboard
-        </Link>
-      </div>
+             <div className="text-center mt-8 pt-6 border-t border-gray-700/50">
+         {currentUser ? (
+           <p className="text-sm text-gray-400 mb-4">
+             You're logged in as {currentUser.display_name} - submit your views above to join the leaderboard!
+           </p>
+         ) : (
+           <>
+             <p className="text-sm text-gray-400 mb-4">
+               Want to see your ranking? Login and submit your total views!
+             </p>
+             <Link href="/auth/login" className="btn-primary">
+               Join the Leaderboard
+             </Link>
+           </>
+         )}
+       </div>
     </div>
   )
 }

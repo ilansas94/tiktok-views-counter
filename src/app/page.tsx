@@ -290,16 +290,20 @@ function AuthenticatedViewsCard() {
             <button
               onClick={async () => {
                 try {
+                  const submissionData = {
+                    username: userInfo.username,
+                    display_name: userInfo.display_name,
+                    total_views: totalViews,
+                    video_count: videoCount,
+                    avatar_url: userInfo.avatar_url
+                  }
+                  
+                  console.log('Submitting to leaderboard:', submissionData)
+                  
                   const response = await fetch('/api/leaderboard', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                      username: userInfo.username,
-                      display_name: userInfo.display_name,
-                      total_views: totalViews,
-                      video_count: videoCount,
-                      avatar_url: userInfo.avatar_url
-                    })
+                    body: JSON.stringify(submissionData)
                   })
                   
                   const data = await response.json()
@@ -424,7 +428,7 @@ export default function Home() {
       <section className="py-16 bg-tiktok-dark">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-center">
-            <Leaderboard />
+            <Leaderboard currentUser={userInfo} />
           </div>
         </div>
       </section>
