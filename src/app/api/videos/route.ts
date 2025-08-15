@@ -42,24 +42,12 @@ export async function POST(request: NextRequest) {
         body: JSON.stringify(requestBody)
       })
 
-      if (!response.ok) {
-        const errorText = await response.text()
-        console.error('Video list API failed:', {
-          status: response.status,
-          statusText: response.statusText,
-          error: errorText,
-          requestCount
-        })
-        return NextResponse.json({ 
-          error: 'Failed to fetch videos',
-          status: response.status,
-          details: errorText
-        }, { status: response.status })
-      }
-
-      const data = await response.json()
+      console.log('TikTok API response status:', response.status, response.statusText)
       
-      // Check if the response contains an error
+      const data = await response.json()
+      console.log('TikTok API response data:', data)
+      
+      // Check if the response contains an error, even if status is 200
       if (data.error) {
         console.error('TikTok API returned error:', data.error)
         return NextResponse.json({ 
@@ -67,6 +55,22 @@ export async function POST(request: NextRequest) {
           details: data.error
         }, { status: 400 })
       }
+      
+      // If status is not ok but we have valid data, still process it
+      if (!response.ok) {
+        console.error('Video list API failed:', {
+          status: response.status,
+          statusText: response.statusText,
+          data: data
+        })
+        return NextResponse.json({ 
+          error: 'Failed to fetch videos',
+          status: response.status,
+          details: JSON.stringify(data)
+        }, { status: response.status })
+      }
+      
+
       console.log('Video list response:', {
         videoCount: data.data?.videos?.length || 0,
         hasMore: data.data?.has_more || false,
