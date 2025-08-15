@@ -1,0 +1,3 @@
+[33m5e31c4b[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m, [m[1;31morigin/main[m[33m)[m Create new tiktok-videos API route to bypass Vercel routing issues
+[33m6acf3cf[m Fix API routes - update get-videos to fetch real data and recreate videos route
+[33m7514743[m Force redeploy to ensure videos API route is updated

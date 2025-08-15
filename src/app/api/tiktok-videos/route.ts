@@ -2,16 +2,20 @@ import { NextRequest, NextResponse } from 'next/server'
 
 export async function POST(request: NextRequest) {
   console.log('=== TIKTOK-VIDEOS API ROUTE CALLED ===')
+  console.log('Request URL:', request.url)
+  console.log('Request method:', request.method)
   
   try {
     const body = await request.json()
     const { accessToken } = body
     
     if (!accessToken) {
+      console.log('No access token provided')
       return NextResponse.json({ error: 'Access token required' }, { status: 400 })
     }
 
     console.log('Starting to fetch real video data from TikTok API')
+    console.log('Access token length:', accessToken.length)
 
     // Fetch real data from TikTok API using the correct endpoint
     let totalViews = 0
@@ -29,6 +33,8 @@ export async function POST(request: NextRequest) {
       if (cursor) {
         apiUrl += `?cursor=${cursor}`
       }
+
+      console.log('Calling TikTok API URL:', apiUrl)
 
       const response = await fetch(apiUrl, {
         method: 'GET',
@@ -100,8 +106,10 @@ export async function POST(request: NextRequest) {
 }
 
 export async function GET() {
+  console.log('=== TIKTOK-VIDEOS GET ROUTE CALLED ===')
   return NextResponse.json({ 
     message: 'TikTok-videos API endpoint is working',
-    status: 'success'
+    status: 'success',
+    timestamp: new Date().toISOString()
   })
 }

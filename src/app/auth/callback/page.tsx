@@ -55,6 +55,7 @@ async function exchangeCodeForToken(code: string): Promise<string | null> {
     console.log('Token exchange successful, response keys:', Object.keys(data))
     console.log('Access token present:', !!data.access_token)
     console.log('Access token length:', data.access_token?.length || 0)
+    console.log('Access token value:', data.access_token ? data.access_token.substring(0, 20) + '...' : 'NULL')
     return data.access_token
   } catch (error) {
     console.error('Error exchanging code for token:', error)
@@ -62,11 +63,41 @@ async function exchangeCodeForToken(code: string): Promise<string | null> {
   }
 }
 
+async function testApiEndpoints(): Promise<{ working: boolean; details: any }> {
+  try {
+    console.log('Testing API endpoints...')
+    
+    // Test health check endpoint first
+    const healthResponse = await fetch('/api/health')
+    console.log('Health check response:', healthResponse.status, healthResponse.statusText)
+    
+    if (healthResponse.ok) {
+      const healthData = await healthResponse.json()
+      console.log('Health check data:', healthData)
+      return { working: true, details: healthData }
+    }
+    
+    return { working: false, details: { status: healthResponse.status, statusText: healthResponse.statusText } }
+  } catch (error) {
+    console.error('Error testing API endpoints:', error)
+    return { working: false, details: error }
+  }
+}
+
 async function fetchVideos(accessToken: string): Promise<{ totalViews: number; videoCount: number; message?: string } | { error: string; status: number } | null> {
   try {
     console.log('Starting video fetch with access token')
+    console.log('Access token value:', accessToken ? accessToken.substring(0, 20) + '...' : 'NULL')
+
+    // First, test if API endpoints are working
+    const apiTest = await testApiEndpoints()
+    if (!apiTest.working) {
+      console.error('API endpoints not working:', apiTest.details)
+      return { error: 'api_not_available', status: 503 }
+    }
 
     // Try the new tiktok-videos route first
+    console.log('Trying /api/tiktok-videos...')
     let response = await fetch('/api/tiktok-videos', {
       method: 'POST',
       headers: {
@@ -74,6 +105,8 @@ async function fetchVideos(accessToken: string): Promise<{ totalViews: number; v
       },
       body: JSON.stringify({ accessToken })
     })
+
+    console.log('TikTok-videos response:', response.status, response.statusText)
 
     // If the new route fails, try the original videos route
     if (!response.ok && response.status === 404) {
@@ -85,6 +118,7 @@ async function fetchVideos(accessToken: string): Promise<{ totalViews: number; v
         },
         body: JSON.stringify({ accessToken })
       })
+      console.log('Videos response:', response.status, response.statusText)
     }
 
     // If both fail, try the get-videos route
@@ -97,9 +131,10 @@ async function fetchVideos(accessToken: string): Promise<{ totalViews: number; v
         },
         body: JSON.stringify({ accessToken })
       })
+      console.log('Get-videos response:', response.status, response.statusText)
     }
 
-    console.log('Video API response status:', response.status, response.statusText)
+    console.log('Final video API response status:', response.status, response.statusText)
     console.log('Video API response headers:', Object.fromEntries(response.headers.entries()))
 
     if (!response.ok) {
@@ -173,8 +208,6 @@ function CallbackContent() {
       // Exchange code for access token
       const accessToken = await exchangeCodeForToken(code)
       
-      console.log('Access token value:', accessToken ? accessToken.substring(0, 20) + '...' : 'NULL')
-      
       if (accessToken) {
         console.log('Access token received, attempting to fetch videos...')
         // Fetch video data
@@ -201,6 +234,10 @@ function CallbackContent() {
             console.log('Video API endpoint not found - this may be a deployment issue')
             setErrorMessage('API endpoint not found — this may be a temporary deployment issue. Showing sample data instead.')
             setErrorType('api_not_found')
+          } else if (videoData.status === 503) {
+            console.log('API endpoints not available')
+            setErrorMessage('API service temporarily unavailable — showing sample data instead.')
+            setErrorType('api_unavailable')
           } else {
             console.log('Video fetch failed, showing sample data')
             setErrorMessage('Unable to fetch live data — showing sample data instead.')
