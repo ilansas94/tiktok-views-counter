@@ -28,6 +28,7 @@ export async function POST(request: NextRequest) {
         },
         body: JSON.stringify({
           max_count: 20,
+          fields: ['id', 'title', 'view_count', 'like_count', 'comment_count', 'share_count'],
           ...(cursor && { cursor })
         })
       })
@@ -51,7 +52,8 @@ export async function POST(request: NextRequest) {
       console.log('Video list response:', {
         videoCount: data.data?.videos?.length || 0,
         hasMore: data.data?.has_more || false,
-        cursor: data.data?.cursor || null
+        cursor: data.data?.cursor || null,
+        fullResponse: data
       })
 
       if (data.data?.videos) {
@@ -66,7 +68,13 @@ export async function POST(request: NextRequest) {
     }
 
     console.log('Video fetch completed:', { totalViews, videoCount })
-    return NextResponse.json({ totalViews, videoCount })
+    
+    // Return success even if no videos found
+    return NextResponse.json({ 
+      totalViews, 
+      videoCount,
+      message: videoCount === 0 ? 'No videos found for this account' : null
+    })
   } catch (error) {
     console.error('Error fetching videos:', error)
     return NextResponse.json({ 
