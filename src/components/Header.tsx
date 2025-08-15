@@ -38,8 +38,8 @@ export default function Header() {
       if (response.ok) {
         // Clear local state
         setUserInfo(null)
-        // Redirect to home page
-        router.push('/')
+        // Refresh the page to update all components
+        window.location.reload()
       }
     } catch (error) {
       console.error('Logout error:', error)

@@ -111,12 +111,19 @@ function AuthenticatedViewsCard() {
     loadVideos()
   }, [])
 
-  const handleHardLogout = async () => {
+  const handleLogout = async () => {
     try {
-      await fetch('/api/session/logout', { method: 'POST' })
-      router.push('/auth/login')
+      const response = await fetch('/api/auth/logout', {
+        method: 'GET',
+      })
+      if (response.ok) {
+        // Clear local state
+        setUserInfo(null)
+        // Refresh the page to update all components
+        window.location.reload()
+      }
     } catch (error) {
-      console.error('Hard logout failed:', error)
+      console.error('Logout error:', error)
     }
   }
 
@@ -228,7 +235,7 @@ function AuthenticatedViewsCard() {
 
                 {/* Hard logout button */}
                 <button
-                  onClick={handleHardLogout}
+                  onClick={handleLogout}
                   className="mt-3 px-3 py-1 bg-red-500/20 border border-red-500/30 text-red-400 text-xs rounded hover:bg-red-500/30 transition-colors"
                 >
                   Hard Logout & Re-auth
@@ -252,7 +259,7 @@ function AuthenticatedViewsCard() {
               Logged in as: {userInfo.display_name}
             </div>
             <button
-              onClick={handleHardLogout}
+              onClick={handleLogout}
               className="btn-secondary w-full block"
             >
               Logout
