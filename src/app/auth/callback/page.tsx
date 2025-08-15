@@ -73,7 +73,33 @@ function CallbackContent() {
         }
       } catch (error) {
         console.error('Video fetch failed:', error)
-        setErrorMessage(error instanceof Error ? error.message : 'Unknown error occurred')
+        
+        // Try to extract TikTok's error message from the response
+        let errorMsg = 'Unknown error occurred'
+        if (error instanceof Error) {
+          try {
+            // Parse the error message to extract TikTok's error details
+            const errorMatch = error.message.match(/Video fetch failed: (.+)/)
+            if (errorMatch) {
+              const errorData = JSON.parse(errorMatch[1])
+              if (errorData.details?.error?.message) {
+                errorMsg = errorData.details.error.message
+              } else if (errorData.details?.message) {
+                errorMsg = errorData.details.message
+              } else if (errorData.error) {
+                errorMsg = errorData.error
+              } else {
+                errorMsg = errorMatch[1]
+              }
+            } else {
+              errorMsg = error.message
+            }
+          } catch (parseError) {
+            errorMsg = error.message
+          }
+        }
+        
+        setErrorMessage(errorMsg)
         setErrorType('video_fetch_error')
       } finally {
         setIsLoading(false)
