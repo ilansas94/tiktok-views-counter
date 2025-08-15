@@ -57,6 +57,9 @@ export async function POST(request: NextRequest) {
       has_code_verifier: !!tokenRequestBody.code_verifier
     })
 
+    console.log('Full redirect URI being sent to TikTok:', tokenRequestBody.redirect_uri)
+    console.log('Expected redirect URI format:', `${baseUrl}/auth/callback`)
+
     const response = await fetch('https://open.tiktokapis.com/v2/oauth/token/', {
       method: 'POST',
       headers: {
@@ -98,6 +101,18 @@ export async function POST(request: NextRequest) {
     }
     
     console.log('Parsed TikTok API response data:', data)
+    console.log('Response keys:', Object.keys(data))
+    console.log('Response values:', Object.values(data))
+    
+    // Check if this is an error response from TikTok
+    if (data.error || data.error_code || data.error_description) {
+      console.error('TikTok API returned an error:', data)
+      return NextResponse.json({ 
+        error: 'TikTok API error',
+        details: data.error_description || data.error || 'Unknown TikTok API error',
+        tiktokError: data
+      }, { status: 400 })
+    }
     
     // Check if the response is empty or missing access_token
     if (!data || !data.access_token) {
