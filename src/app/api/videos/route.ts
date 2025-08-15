@@ -1,60 +1,74 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { cookies } from 'next/headers'
 
-// Default fields to request from TikTok API
-const defaultFields = [
+const defaultFields: string[] = [
   'id',
   'title',
   'create_time',
   'duration',
   'cover_image_url',
   'share_url',
-  'statistics'
+  // some implementations require dotted subfields for statistics:
+  'statistics.view_count'
 ]
 
 export async function POST(request: NextRequest) {
-  if (request.method !== 'POST') {
-    return NextResponse.json({ error: 'Method not allowed' }, { status: 405 })
-  }
-
   try {
-    const cookieStore = cookies()
-    const cookieAccess = cookieStore.get('tt_access')?.value
-    
-    // Parse body from request, with fallback to empty object
-    const body = await request.json().catch(() => ({}))
-    const { access_token = cookieAccess, cursor = 0, max_count = 20, fields: clientFields } = body
+    const cookieAccess = cookies().get('tt_access')?.value
+    const bodyIn = await request.json().catch(() => ({} as any))
+
+    const access_token: string | undefined =
+      bodyIn.access_token ?? cookieAccess
+    const cursor = Number(bodyIn.cursor ?? 0) || 0
+    const max_count = Number(bodyIn.max_count ?? 20) || 20
+
+    // normalize fields
+    const fields: string[] =
+      Array.isArray(bodyIn.fields) && bodyIn.fields.length
+        ? bodyIn.fields
+        : defaultFields
 
     if (!access_token) {
-      return NextResponse.json({ error: 'Missing access_token (cookie or body)' }, { status: 400 })
+      return NextResponse.json(
+        { error: 'Missing access_token (cookie or body)' },
+        { status: 400 }
+      )
     }
 
-    // Set fields - use client fields if provided, otherwise use default fields
-    const fields = Array.isArray(clientFields) && clientFields.length
-      ? clientFields
-      : defaultFields
+    // build payload – include CSV fallback just in case
+    const payload = {
+      cursor,
+      max_count,
+      fields,
+      fields_csv: fields.join(','), // harmless fallback
+    }
 
-    const tiktok = await fetch('https://open.tiktokapis.com/v2/video/list/', {
+    // TEMP LOGS (visible in Vercel logs)
+    console.log('[videos] Request payload to TikTok:', payload)
+
+    const resp = await fetch('https://open.tiktokapis.com/v2/video/list/', {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${access_token}`,
-        'Content-Type': 'application/json'
+        Authorization: `Bearer ${decodeURIComponent(access_token)}`,
+        'Content-Type': 'application/json',
+        Accept: 'application/json',
       },
-      body: JSON.stringify({
-        cursor: Number(cursor) || 0,
-        max_count: Number(max_count) || 20,
-        fields
-      })
+      body: JSON.stringify(payload),
     })
 
-    const payload = await tiktok.json()
+    const json = await resp.json().catch(() => ({}))
 
-    if (!tiktok.ok) {
-      return NextResponse.json({ error: 'tiktok.video.list', details: payload }, { status: tiktok.status })
+    if (!resp.ok) {
+      console.error('[videos] TikTok error:', json)
+      return NextResponse.json(
+        { error: 'tiktok.video.list', details: json },
+        { status: resp.status }
+      )
     }
 
-    return NextResponse.json(payload)
-  } catch (e) {
+    return NextResponse.json(json)
+  } catch (e: any) {
+    console.error('[videos] Server error:', e)
     return NextResponse.json({ error: 'Server error', details: String(e) }, { status: 500 })
   }
 }
