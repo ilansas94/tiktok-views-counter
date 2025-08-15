@@ -14,6 +14,7 @@ export async function GET(request: NextRequest) {
     apiRoutes: [
       '/api/health',
       '/api/test',
+      '/api/video-data',
       '/api/tiktok-videos',
       '/api/videos',
       '/api/get-videos',

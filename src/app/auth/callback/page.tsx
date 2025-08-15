@@ -96,9 +96,9 @@ async function fetchVideos(accessToken: string): Promise<{ totalViews: number; v
       return { error: 'api_not_available', status: 503 }
     }
 
-    // Try the new tiktok-videos route first
-    console.log('Trying /api/tiktok-videos...')
-    let response = await fetch('/api/tiktok-videos', {
+    // Try the new unified video-data route first
+    console.log('Trying /api/video-data...')
+    let response = await fetch('/api/video-data', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -106,9 +106,22 @@ async function fetchVideos(accessToken: string): Promise<{ totalViews: number; v
       body: JSON.stringify({ accessToken })
     })
 
-    console.log('TikTok-videos response:', response.status, response.statusText)
+    console.log('Video-data response:', response.status, response.statusText)
 
-    // If the new route fails, try the original videos route
+    // If the unified route fails, try the tiktok-videos route
+    if (!response.ok && response.status === 404) {
+      console.log('Video-data route failed, trying tiktok-videos route')
+      response = await fetch('/api/tiktok-videos', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ accessToken })
+      })
+      console.log('TikTok-videos response:', response.status, response.statusText)
+    }
+
+    // If that fails, try the original videos route
     if (!response.ok && response.status === 404) {
       console.log('TikTok-videos route failed, trying original videos route')
       response = await fetch('/api/videos', {
@@ -121,7 +134,7 @@ async function fetchVideos(accessToken: string): Promise<{ totalViews: number; v
       console.log('Videos response:', response.status, response.statusText)
     }
 
-    // If both fail, try the get-videos route
+    // If all fail, try the get-videos route
     if (!response.ok && response.status === 404) {
       console.log('Original videos route failed, trying get-videos route')
       response = await fetch('/api/get-videos', {
