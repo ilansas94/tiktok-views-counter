@@ -1,10 +1,10 @@
 'use client'
 
-import { useEffect } from 'react'
+import { useEffect, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 
-export default function LoginPage() {
+function LoginComponent() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const clientKey = process.env.NEXT_PUBLIC_TIKTOK_CLIENT_KEY
@@ -108,5 +108,29 @@ export default function LoginPage() {
         </div>
       </div>
     </div>
+  )
+}
+
+function LoadingFallback() {
+  return (
+    <div className="min-h-screen flex items-center justify-center bg-tiktok-dark">
+      <div className="max-w-md w-full mx-auto p-6">
+        <div className="card">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-tiktok-primary mx-auto mb-4"></div>
+            <h1 className="text-xl font-bold mb-2">Loading...</h1>
+            <p className="text-gray-400">Please wait while we prepare the login page.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense fallback={<LoadingFallback />}>
+      <LoginComponent />
+    </Suspense>
   )
 }
