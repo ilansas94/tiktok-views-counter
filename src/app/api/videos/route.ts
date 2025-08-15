@@ -8,6 +8,33 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Access token required' }, { status: 400 })
     }
 
+    // First, get the user info to get their TikTok username
+    console.log('Getting user info first...')
+    const userResponse = await fetch('https://open.tiktokapis.com/v2/user/info/', {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${accessToken}`,
+        'Content-Type': 'application/json',
+      }
+    })
+
+    if (!userResponse.ok) {
+      const errorText = await userResponse.text()
+      console.error('User info API failed:', {
+        status: userResponse.status,
+        statusText: userResponse.statusText,
+        error: errorText
+      })
+      return NextResponse.json({ 
+        error: 'Failed to get user info',
+        status: userResponse.status,
+        details: errorText
+      }, { status: userResponse.status })
+    }
+
+    const userData = await userResponse.json()
+    console.log('User info response:', userData)
+
     let totalViews = 0
     let videoCount = 0
     let cursor = ''
@@ -20,17 +47,22 @@ export async function POST(request: NextRequest) {
       requestCount++
       console.log(`Making video list request #${requestCount}`)
 
+      const requestBody = {
+        max_count: 20,
+        fields: ['id', 'title', 'view_count', 'like_count', 'comment_count', 'share_count'],
+        ...(cursor && { cursor })
+      }
+
+      console.log('Making video list request with:', requestBody)
+
+      // Try the video list endpoint
       const response = await fetch('https://open.tiktokapis.com/v2/video/list/', {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${accessToken}`,
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-          max_count: 20,
-          fields: ['id', 'title', 'view_count', 'like_count', 'comment_count', 'share_count'],
-          ...(cursor && { cursor })
-        })
+        body: JSON.stringify(requestBody)
       })
 
       if (!response.ok) {
