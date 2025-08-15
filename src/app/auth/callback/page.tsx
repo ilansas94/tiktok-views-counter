@@ -74,8 +74,18 @@ async function fetchVideos(accessToken: string): Promise<{ totalViews: number; v
       body: JSON.stringify({ accessToken })
     })
 
+    console.log('Video API response status:', response.status, response.statusText)
+    console.log('Video API response headers:', Object.fromEntries(response.headers.entries()))
+
     if (!response.ok) {
-      const errorData = await response.json()
+      let errorData
+      try {
+        errorData = await response.json()
+      } catch (parseError) {
+        const errorText = await response.text()
+        errorData = { error: 'Failed to parse error response', details: errorText }
+      }
+      
       console.error('Video fetch failed:', {
         status: response.status,
         statusText: response.statusText,
@@ -86,7 +96,13 @@ async function fetchVideos(accessToken: string): Promise<{ totalViews: number; v
       if (response.status === 401) {
         return { error: 'unauthorized', status: 401 }
       }
-      return null
+      
+      // Handle 404 specifically
+      if (response.status === 404) {
+        return { error: 'api_not_found', status: 404 }
+      }
+      
+      return { error: 'video_fetch_failed', status: response.status }
     }
 
     const data = await response.json()
@@ -144,11 +160,21 @@ function CallbackContent() {
           setTotalViews(videoData.totalViews)
           setVideoCount(videoData.videoCount)
           setIsLiveData(true)
-        } else if (videoData && 'error' in videoData && videoData.status === 401) {
-          console.log('Video fetch failed with 401 - expected in sandbox mode, showing sample data')
-          // Don't show error for 401 - this is expected in sandbox mode
-          setErrorMessage('Live data unavailable in sandbox mode — showing sample data instead.')
-          setErrorType('sandbox_mode')
+        } else if (videoData && 'error' in videoData) {
+          if (videoData.status === 401) {
+            console.log('Video fetch failed with 401 - expected in sandbox mode, showing sample data')
+            // Don't show error for 401 - this is expected in sandbox mode
+            setErrorMessage('Live data unavailable in sandbox mode — showing sample data instead.')
+            setErrorType('sandbox_mode')
+          } else if (videoData.status === 404) {
+            console.log('Video API endpoint not found - this may be a deployment issue')
+            setErrorMessage('API endpoint not found — this may be a temporary deployment issue. Showing sample data instead.')
+            setErrorType('api_not_found')
+          } else {
+            console.log('Video fetch failed, showing sample data')
+            setErrorMessage('Unable to fetch live data — showing sample data instead.')
+            setErrorType('video_fetch_error')
+          }
         } else {
           console.log('Video fetch failed, showing sample data')
           setErrorMessage('Unable to fetch live data — showing sample data instead.')

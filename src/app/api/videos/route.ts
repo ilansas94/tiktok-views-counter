@@ -2,10 +2,19 @@ import { NextRequest, NextResponse } from 'next/server'
 
 // Force redeploy to ensure API route is properly deployed
 export async function POST(request: NextRequest) {
+  console.log('Videos API route called - POST method')
+  console.log('Request URL:', request.url)
+  console.log('Request method:', request.method)
+  console.log('Request headers:', Object.fromEntries(request.headers.entries()))
+  
   try {
-    const { accessToken } = await request.json()
+    const body = await request.json()
+    console.log('Request body keys:', Object.keys(body))
+    
+    const { accessToken } = body
     
     if (!accessToken) {
+      console.log('No access token provided')
       return NextResponse.json({ error: 'Access token required' }, { status: 400 })
     }
 
@@ -80,10 +89,23 @@ export async function POST(request: NextRequest) {
     console.log('Video fetch completed:', { totalViews, videoCount })
     return NextResponse.json({ totalViews, videoCount })
   } catch (error) {
-    console.error('Error fetching videos:', error)
+    console.error('Error in videos API route:', error)
     return NextResponse.json({ 
       error: 'Internal server error',
       details: error instanceof Error ? error.message : 'Unknown error'
     }, { status: 500 })
   }
+}
+
+// Add explicit GET method for testing
+export async function GET(request: NextRequest) {
+  console.log('Videos API route called - GET method')
+  console.log('Request URL:', request.url)
+  
+  return NextResponse.json({ 
+    message: 'Videos API endpoint is working',
+    method: 'GET',
+    timestamp: new Date().toISOString(),
+    url: request.url
+  })
 }
