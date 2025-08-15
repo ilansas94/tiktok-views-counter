@@ -8,6 +8,8 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Access token required' }, { status: 400 })
     }
 
+    console.log('Starting video fetch with access token:', accessToken.substring(0, 20) + '...')
+
     let totalViews = 0
     let videoCount = 0
     let cursor = ''
@@ -20,17 +22,27 @@ export async function POST(request: NextRequest) {
       requestCount++
       console.log(`Making video list request #${requestCount}`)
 
+      // Prepare request body
+      const requestBody: any = {
+        max_count: 20
+      }
+      
+      if (cursor) {
+        requestBody.cursor = cursor
+      }
+
+      console.log('Video API request body:', requestBody)
+
       const response = await fetch('https://open.tiktokapis.com/v2/video/list/', {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${accessToken}`,
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-          max_count: 20,
-          ...(cursor && { cursor })
-        })
+        body: JSON.stringify(requestBody)
       })
+
+      console.log('Video API response status:', response.status, response.statusText)
 
       if (!response.ok) {
         const errorText = await response.text()
@@ -40,6 +52,17 @@ export async function POST(request: NextRequest) {
           error: errorText,
           requestCount
         })
+        
+        // Handle 401 errors gracefully (expected in sandbox mode)
+        if (response.status === 401) {
+          console.log('Video API returned 401 - expected in sandbox mode')
+          return NextResponse.json({ 
+            error: 'unauthorized',
+            status: 401,
+            details: 'Video API access denied - expected in sandbox mode'
+          }, { status: 401 })
+        }
+        
         return NextResponse.json({ 
           error: 'Failed to fetch videos',
           status: response.status,
