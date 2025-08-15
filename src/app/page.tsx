@@ -5,8 +5,10 @@ import { ViewsCard } from '@/components/ViewsCard'
 import { HowItWorks } from '@/components/HowItWorks'
 import { Leaderboard } from '@/components/Leaderboard'
 import { Toast } from '@/components/Toast'
+import { LoginButton } from '@/components/LoginButton'
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
+import { cookieHas, deriveUsernameFromVideos } from '@/lib/utils'
 
 async function fetchVideos(cursor = 0) {
   const r = await fetch('/api/videos', {
@@ -24,6 +26,7 @@ function AuthenticatedViewsCard() {
   const router = useRouter()
   const [totalViews, setTotalViews] = useState(0)
   const [videoCount, setVideoCount] = useState(0)
+  const [videos, setVideos] = useState<any[]>([])
   const [isLiveData, setIsLiveData] = useState(false)
   const [errorMessage, setErrorMessage] = useState('')
   const [isLoading, setIsLoading] = useState(true)
@@ -80,6 +83,7 @@ function AuthenticatedViewsCard() {
         }
 
         const vids = Array.isArray(data?.videos) ? data.videos : [];
+        setVideos(vids);
         setVideoCount(vids.length);
         setTotalViews(Number(data?.total_views ?? 0));
         setIsLiveData(true);
@@ -156,13 +160,13 @@ function AuthenticatedViewsCard() {
       />
       <div className="card max-w-md w-full">
         <div className="text-center">
-        {!isAuthLoading && userInfo && (
+        {!isAuthLoading && (userInfo || videos.length > 0) && (
           <div className="mb-4">
             <div className="w-16 h-16 mx-auto rounded-full border-2 border-tiktok-primary overflow-hidden bg-gray-700 flex items-center justify-center">
-              {userInfo.avatar_url ? (
+              {userInfo?.avatar_url ? (
                 <img 
                   src={`/api/avatar?url=${encodeURIComponent(userInfo.avatar_url)}`}
-                  alt={userInfo.display_name}
+                  alt={userInfo.display_name || 'User'}
                   className="w-full h-full object-cover"
                   onError={(e) => {
                     // Fallback to initials if image fails to load
@@ -170,18 +174,19 @@ function AuthenticatedViewsCard() {
                     target.style.display = 'none';
                     const parent = target.parentElement;
                     if (parent) {
-                      parent.innerHTML = `<div class="text-white font-bold text-lg">${userInfo.display_name?.charAt(0) || 'U'}</div>`;
+                      const displayName = userInfo?.display_name || deriveUsernameFromVideos(videos) || 'U';
+                      parent.innerHTML = `<div class="text-white font-bold text-lg">${displayName.charAt(0)}</div>`;
                     }
                   }}
                 />
               ) : (
                 <div className="text-white font-bold text-lg">
-                  {userInfo.display_name?.charAt(0) || 'U'}
+                  {(userInfo?.display_name || deriveUsernameFromVideos(videos) || 'U').charAt(0)}
                 </div>
               )}
             </div>
             <div className="text-sm text-gray-400 mt-2">
-              {userInfo.display_name}
+              {userInfo?.display_name || deriveUsernameFromVideos(videos) || 'TikTok User'}
             </div>
           </div>
         )}
@@ -298,17 +303,17 @@ function AuthenticatedViewsCard() {
           </div>
         )}
         
-        {!isAuthLoading && userInfo && (
+        {!isAuthLoading && (userInfo || videos.length > 0) && (
           <div className="mt-4 space-y-3">
             <button
               onClick={async () => {
                 try {
                   const submissionData = {
-                    username: userInfo.username,
-                    display_name: userInfo.display_name,
+                    username: userInfo?.username || deriveUsernameFromVideos(videos) || 'unknown',
+                    display_name: userInfo?.display_name || deriveUsernameFromVideos(videos) || 'TikTok User',
                     total_views: totalViews,
                     video_count: videoCount,
-                    avatar_url: userInfo.avatar_url
+                    avatar_url: userInfo?.avatar_url
                   }
                   
                   console.log('Submitting to leaderboard:', submissionData)
@@ -370,6 +375,12 @@ export default function Home() {
   const [isAuthLoading, setIsAuthLoading] = useState(true)
 
   useEffect(() => {
+    // If profile scope is missing, route to re-consent page
+    if (cookieHas('needs_profile_scope=1')) {
+      window.location.href = '/grant/profile';
+      return;
+    }
+
     async function checkAuth() {
       try {
         const response = await fetch('/api/debug/whoami')
@@ -415,9 +426,7 @@ export default function Home() {
                   Connect your account to see the sum of views across all your videos.
                 </p>
                 <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-16 animate-slide-up">
-                  <Link href="/auth/login" className="btn-primary text-lg px-8 py-4">
-                    Login with TikTok
-                  </Link>
+                  <LoginButton />
                   <span className="text-gray-400 text-sm">
                     Free • No data stored • Secure OAuth
                   </span>
