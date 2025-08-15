@@ -41,12 +41,18 @@ export async function POST(request: NextRequest) {
       tokenRequestBody.code_verifier = codeVerifier
     }
 
+    // Convert the request body to URL-encoded format
+    const formData = new URLSearchParams()
+    Object.entries(tokenRequestBody).forEach(([key, value]) => {
+      formData.append(key, value as string)
+    })
+
     const response = await fetch('https://open.tiktokapis.com/v2/oauth/token/', {
       method: 'POST',
       headers: {
-        'Content-Type': 'application/json',
+        'Content-Type': 'application/x-www-form-urlencoded',
       },
-      body: JSON.stringify(tokenRequestBody)
+      body: formData.toString()
     })
 
     if (!response.ok) {
