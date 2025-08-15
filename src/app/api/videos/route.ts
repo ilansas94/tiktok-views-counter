@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
 
-// Force redeploy - Real TikTok API integration
 export async function POST(request: NextRequest) {
   console.log('=== VIDEOS API ROUTE CALLED ===')
   
@@ -21,17 +20,15 @@ export async function POST(request: NextRequest) {
     let hasMore = true
     let requestCount = 0
 
-    while (hasMore && requestCount < 5) { // Limit to 5 requests to prevent infinite loops
+    while (hasMore && requestCount < 5) {
       requestCount++
       console.log(`Making TikTok video list request #${requestCount}`)
 
-      // Build the TikTok API URL with cursor if available
       let apiUrl = 'https://open.tiktokapis.com/v2/video/list/'
       if (cursor) {
         apiUrl += `?cursor=${cursor}`
       }
 
-      // Call the TikTok video list endpoint
       const response = await fetch(apiUrl, {
         method: 'GET',
         headers: {
@@ -51,7 +48,6 @@ export async function POST(request: NextRequest) {
           requestCount
         })
         
-        // Handle 401 errors gracefully (expected in sandbox mode)
         if (response.status === 401) {
           console.log('TikTok API returned 401 - expected in sandbox mode')
           return NextResponse.json({ 

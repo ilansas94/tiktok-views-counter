@@ -11,11 +11,85 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Access token required' }, { status: 400 })
     }
 
-    // Return sample data for testing
+    console.log('Starting to fetch real video data from TikTok API via get-videos route')
+
+    // Fetch real data from TikTok API
+    let totalViews = 0
+    let videoCount = 0
+    let cursor = ''
+    let hasMore = true
+    let requestCount = 0
+
+    while (hasMore && requestCount < 5) { // Limit to 5 requests to prevent infinite loops
+      requestCount++
+      console.log(`Making TikTok video list request #${requestCount}`)
+
+      // Build the TikTok API URL with cursor if available
+      let apiUrl = 'https://open.tiktokapis.com/v2/video/list/'
+      if (cursor) {
+        apiUrl += `?cursor=${cursor}`
+      }
+
+      // Call the TikTok video list endpoint
+      const response = await fetch(apiUrl, {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${accessToken}`,
+          'Content-Type': 'application/json',
+        }
+      })
+
+      console.log('TikTok API response status:', response.status, response.statusText)
+
+      if (!response.ok) {
+        const errorText = await response.text()
+        console.error('TikTok video list API failed:', {
+          status: response.status,
+          statusText: response.statusText,
+          error: errorText,
+          requestCount
+        })
+        
+        // Handle 401 errors gracefully (expected in sandbox mode)
+        if (response.status === 401) {
+          console.log('TikTok API returned 401 - expected in sandbox mode')
+          return NextResponse.json({ 
+            error: 'unauthorized',
+            status: 401,
+            details: 'Video API access denied - expected in sandbox mode'
+          }, { status: 401 })
+        }
+        
+        return NextResponse.json({ 
+          error: 'Failed to fetch videos from TikTok',
+          status: response.status,
+          details: errorText
+        }, { status: response.status })
+      }
+
+      const data = await response.json()
+      console.log('TikTok video list response:', {
+        videoCount: data.data?.videos?.length || 0,
+        hasMore: data.data?.has_more || false,
+        cursor: data.data?.cursor || null
+      })
+
+      if (data.data?.videos) {
+        data.data.videos.forEach((video: any) => {
+          totalViews += video.view_count || 0
+          videoCount++
+        })
+      }
+
+      hasMore = data.data?.has_more || false
+      cursor = data.data?.cursor || ''
+    }
+
+    console.log('Real video data fetch completed:', { totalViews, videoCount })
     return NextResponse.json({ 
-      totalViews: 9876543,
-      videoCount: 15,
-      message: 'Sample data from get-videos route'
+      totalViews, 
+      videoCount,
+      message: 'Real data fetched from TikTok API via get-videos route'
     })
     
   } catch (error) {
