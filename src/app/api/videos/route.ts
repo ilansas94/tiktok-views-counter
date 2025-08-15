@@ -8,32 +8,8 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Access token required' }, { status: 400 })
     }
 
-    // First, get the user info to get their TikTok username
-    console.log('Getting user info first...')
-    const userResponse = await fetch('https://open.tiktokapis.com/v2/user/info/', {
-      method: 'GET',
-      headers: {
-        'Authorization': `Bearer ${accessToken}`,
-        'Content-Type': 'application/json',
-      }
-    })
-
-    if (!userResponse.ok) {
-      const errorText = await userResponse.text()
-      console.error('User info API failed:', {
-        status: userResponse.status,
-        statusText: userResponse.statusText,
-        error: errorText
-      })
-      return NextResponse.json({ 
-        error: 'Failed to get user info',
-        status: userResponse.status,
-        details: errorText
-      }, { status: userResponse.status })
-    }
-
-    const userData = await userResponse.json()
-    console.log('User info response:', userData)
+    // Skip user info for now and go directly to video list
+    console.log('Skipping user info, going directly to video list...')
 
     let totalViews = 0
     let videoCount = 0
@@ -47,11 +23,10 @@ export async function POST(request: NextRequest) {
       requestCount++
       console.log(`Making video list request #${requestCount}`)
 
-      // Try with the test username from sandbox settings
+      // Try without username parameter first
       const requestBody = {
         max_count: 20,
         fields: ['id', 'title', 'view_count', 'like_count', 'comment_count', 'share_count'],
-        username: 'ad1ix', // Use the test username from sandbox settings
         ...(cursor && { cursor })
       }
 
