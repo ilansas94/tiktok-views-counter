@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 
+// Force redeploy - Real TikTok API integration
 export async function POST(request: NextRequest) {
   console.log('=== VIDEOS API ROUTE CALLED ===')
   
