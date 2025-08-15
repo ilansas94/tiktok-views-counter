@@ -17,9 +17,9 @@ export default function Header() {
         if (response.ok) {
           const data = await response.json()
           console.log('Header - Whoami API response:', data) // Debug log
-          if (data.ok && data.data?.data) {
-            console.log('User data structure:', data.data.data) // Debug the actual user data
-            setUserInfo(data.data.data)
+          if (data.ok && data.data?.data?.user) {
+            console.log('User data structure:', data.data.data.user) // Debug the actual user data
+            setUserInfo(data.data.data.user)
           }
         }
       } catch (error) {

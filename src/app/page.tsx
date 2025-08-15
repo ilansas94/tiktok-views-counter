@@ -281,8 +281,10 @@ export default function Home() {
         const response = await fetch('/api/debug/whoami')
         if (response.ok) {
           const data = await response.json()
-          if (data.ok && data.data?.data) {
-            setUserInfo(data.data.data)
+          console.log('Home - Whoami API response:', data) // Debug log
+          if (data.ok && data.data?.data?.user) {
+            console.log('User data structure:', data.data.data.user) // Debug the actual user data
+            setUserInfo(data.data.data.user)
           }
         }
       } catch (error) {
