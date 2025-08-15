@@ -37,9 +37,10 @@ function AuthenticatedViewsCard() {
         const response = await fetch('/api/debug/whoami')
         if (response.ok) {
           const data = await response.json()
-          if (data.ok && data.data?.data) {
-            setUserInfo(data.data.data)
-          }
+                  if (data.ok && data.data?.data?.user) {
+          console.log('AuthenticatedViewsCard - User data:', data.data.data.user) // Debug log
+          setUserInfo(data.data.data.user)
+        }
         }
       } catch (error) {
         console.error('Error checking auth:', error)
