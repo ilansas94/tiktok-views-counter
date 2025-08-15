@@ -1,6 +1,4 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { promises as fs } from 'fs'
-import path from 'path'
 
 // Define the data structure
 interface LeaderboardEntry {
@@ -12,53 +10,73 @@ interface LeaderboardEntry {
   submitted_at: string
 }
 
-// Path to the persistent data file
-const DATA_FILE_PATH = path.join(process.cwd(), 'data', 'leaderboard.json')
+// In-memory storage for Vercel (will reset on cold starts, but works for demo)
+// In production, you'd want to use a database like Vercel KV, Supabase, or similar
+let leaderboardData: LeaderboardEntry[] = []
 
-// Ensure data directory exists
+// For development, we can still use file storage
+const isDevelopment = process.env.NODE_ENV === 'development'
+
+// Path to the persistent data file (only for development)
+const DATA_FILE_PATH = isDevelopment ? require('path').join(require('process').cwd(), 'data', 'leaderboard.json') : null
+
+// Ensure data directory exists (development only)
 async function ensureDataDirectory() {
+  if (!isDevelopment) return
+  
+  const fs = require('fs').promises
+  const path = require('path')
   const dataDir = path.dirname(DATA_FILE_PATH)
-  console.log('Data directory path:', dataDir)
   try {
     await fs.access(dataDir)
-    console.log('Data directory already exists')
   } catch {
-    console.log('Creating data directory...')
     await fs.mkdir(dataDir, { recursive: true })
-    console.log('Data directory created successfully')
   }
 }
 
-// Load leaderboard data from file
+// Load leaderboard data
 async function loadLeaderboardData(): Promise<LeaderboardEntry[]> {
-  try {
-    await ensureDataDirectory()
-    const data = await fs.readFile(DATA_FILE_PATH, 'utf-8')
-    const parsed = JSON.parse(data)
-    console.log(`Loaded ${parsed.length} leaderboard entries from file`)
-    return parsed
-  } catch (error) {
-    // If file doesn't exist or is invalid, return empty array
-    if (error instanceof Error && 'code' in error && error.code === 'ENOENT') {
-      console.log('No existing leaderboard data file found, starting fresh')
-    } else {
-      console.error('Error loading leaderboard data:', error)
+  if (isDevelopment) {
+    // Development: Load from file
+    try {
+      const fs = require('fs').promises
+      await ensureDataDirectory()
+      const data = await fs.readFile(DATA_FILE_PATH, 'utf-8')
+      const parsed = JSON.parse(data)
+      console.log(`Loaded ${parsed.length} leaderboard entries from file`)
+      return parsed
+    } catch (error) {
+      if (error instanceof Error && 'code' in error && error.code === 'ENOENT') {
+        console.log('No existing leaderboard data file found, starting fresh')
+      } else {
+        console.error('Error loading leaderboard data:', error)
+      }
+      return []
     }
-    return []
+  } else {
+    // Production: Use in-memory storage (will reset on cold starts)
+    console.log(`Loaded ${leaderboardData.length} leaderboard entries from memory`)
+    return leaderboardData
   }
 }
 
-// Save leaderboard data to file
+// Save leaderboard data
 async function saveLeaderboardData(data: LeaderboardEntry[]) {
-  try {
-    console.log('Attempting to save leaderboard data...')
-    await ensureDataDirectory()
-    console.log('Writing data to file:', DATA_FILE_PATH)
-    await fs.writeFile(DATA_FILE_PATH, JSON.stringify(data, null, 2))
-    console.log('Leaderboard data saved, total entries:', data.length)
-  } catch (error) {
-    console.error('Error saving leaderboard data:', error)
-    throw error
+  if (isDevelopment) {
+    // Development: Save to file
+    try {
+      const fs = require('fs').promises
+      await ensureDataDirectory()
+      await fs.writeFile(DATA_FILE_PATH, JSON.stringify(data, null, 2))
+      console.log('Leaderboard data saved to file, total entries:', data.length)
+    } catch (error) {
+      console.error('Error saving leaderboard data:', error)
+      throw error
+    }
+  } else {
+    // Production: Update in-memory storage
+    leaderboardData = [...data]
+    console.log('Leaderboard data saved to memory, total entries:', data.length)
   }
 }
 
