@@ -7,8 +7,9 @@ import Link from 'next/link'
 async function fetchVideos(cursor = 0) {
   const r = await fetch('/api/videos', {
     method: 'POST',
+    credentials: 'include',                  // IMPORTANT: send tt_access cookie
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ cursor }) // token comes from cookie
+    body: JSON.stringify({ cursor, max_count: 20 }),
   })
   const j = await r.json()
   if (!r.ok) throw new Error(`Video fetch failed: ${JSON.stringify(j)}`)
@@ -55,23 +56,35 @@ function CallbackContent() {
     }
 
     async function loadVideos() {
+      setErrorMessage('')
+      setErrorType('')
+      setDebugInfo(null)
+      setWhoamiInfo(null)
+      setStatusInfo(null)
+      
       try {
-        const videoData = await fetchVideos()
+        const res = await fetch('/api/videos', {
+          method: 'POST',
+          credentials: 'include',                  // IMPORTANT: send tt_access cookie
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ cursor: 0, max_count: 20 }),
+        });
+
+        const data = await res.json();
+        if (!res.ok) {
+          const msg =
+            data?.details?.error?.message ||
+            data?.details?.message ||
+            data?.error || 'Unknown error';
+          throw new Error(msg);
+        }
+
+        const vids = Array.isArray(data?.videos) ? data.videos : [];
+        setVideoCount(vids.length);
+        setTotalViews(Number(data?.total_views ?? 0));
+        setIsLiveData(true);
         
-        if (videoData.data?.videos) {
-          let totalViews = 0
-          let videoCount = 0
-          
-          videoData.data.videos.forEach((video: any) => {
-            totalViews += video.view_count || 0
-            videoCount++
-          })
-          
-          setTotalViews(totalViews)
-          setVideoCount(videoCount)
-          setIsLiveData(true)
-          console.log('Live data loaded successfully:', { totalViews, videoCount })
-        } else {
+        if (vids.length === 0) {
           setErrorMessage('No videos found in response')
           setErrorType('no_videos')
           
@@ -94,38 +107,13 @@ function CallbackContent() {
             console.error('Diagnostic fetch failed:', debugError)
           }
         }
-      } catch (error) {
-        console.error('Video fetch failed:', error)
-        
-        // Try to extract TikTok's error message from the response
-        let errorMsg = 'Unknown error occurred'
-        if (error instanceof Error) {
-          try {
-            // Parse the error message to extract TikTok's error details
-            const errorMatch = error.message.match(/Video fetch failed: (.+)/)
-            if (errorMatch) {
-              const errorData = JSON.parse(errorMatch[1])
-              if (errorData.details?.error?.message) {
-                errorMsg = errorData.details.error.message
-              } else if (errorData.details?.message) {
-                errorMsg = errorData.details.message
-              } else if (errorData.error) {
-                errorMsg = errorData.error
-              } else {
-                errorMsg = errorMatch[1]
-              }
-            } else {
-              errorMsg = error.message
-            }
-          } catch (parseError) {
-            errorMsg = error.message
-          }
-        }
-        
-        setErrorMessage(errorMsg)
-        setErrorType('video_fetch_error')
+      } catch (e: any) {
+        setVideoCount(0);
+        setTotalViews(0);
+        setErrorMessage(e.message || String(e));
+        setErrorType('video_fetch_error');
       } finally {
-        setIsLoading(false)
+        setIsLoading(false);
       }
     }
 

@@ -9,8 +9,9 @@ import { useRouter } from 'next/navigation'
 async function fetchVideos(cursor = 0) {
   const r = await fetch('/api/videos', {
     method: 'POST',
+    credentials: 'include',                  // IMPORTANT: send tt_access cookie
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ cursor }) // token comes from cookie
+    body: JSON.stringify({ cursor, max_count: 20 }),
   })
   const j = await r.json()
   if (!r.ok) throw new Error(`Video fetch failed: ${JSON.stringify(j)}`)
@@ -30,23 +31,34 @@ function AuthenticatedViewsCard() {
 
   useEffect(() => {
     async function loadVideos() {
+      setErrorMessage('')
+      setDebugInfo(null)
+      setWhoamiInfo(null)
+      setStatusInfo(null)
+      
       try {
-        const videoData = await fetchVideos()
+        const res = await fetch('/api/videos', {
+          method: 'POST',
+          credentials: 'include',                  // IMPORTANT: send tt_access cookie
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ cursor: 0, max_count: 20 }),
+        });
+
+        const data = await res.json();
+        if (!res.ok) {
+          const msg =
+            data?.details?.error?.message ||
+            data?.details?.message ||
+            data?.error || 'Unknown error';
+          throw new Error(msg);
+        }
+
+        const vids = Array.isArray(data?.videos) ? data.videos : [];
+        setVideoCount(vids.length);
+        setTotalViews(Number(data?.total_views ?? 0));
+        setIsLiveData(true);
         
-        if (videoData.data?.videos) {
-          let totalViews = 0
-          let videoCount = 0
-          
-          videoData.data.videos.forEach((video: any) => {
-            totalViews += video.view_count || 0
-            videoCount++
-          })
-          
-          setTotalViews(totalViews)
-          setVideoCount(videoCount)
-          setIsLiveData(true)
-          console.log('Live data loaded successfully:', { totalViews, videoCount })
-        } else {
+        if (vids.length === 0) {
           setErrorMessage('No videos found in response')
           
           // Fetch diagnostic info when no videos found
@@ -68,37 +80,12 @@ function AuthenticatedViewsCard() {
             console.error('Diagnostic fetch failed:', debugError)
           }
         }
-      } catch (error) {
-        console.error('Video fetch failed:', error)
-        
-        // Try to extract TikTok's error message from the response
-        let errorMsg = 'Unknown error occurred'
-        if (error instanceof Error) {
-          try {
-            // Parse the error message to extract TikTok's error details
-            const errorMatch = error.message.match(/Video fetch failed: (.+)/)
-            if (errorMatch) {
-              const errorData = JSON.parse(errorMatch[1])
-              if (errorData.details?.error?.message) {
-                errorMsg = errorData.details.error.message
-              } else if (errorData.details?.message) {
-                errorMsg = errorData.details.message
-              } else if (errorData.error) {
-                errorMsg = errorData.error
-              } else {
-                errorMsg = errorMatch[1]
-              }
-            } else {
-              errorMsg = error.message
-            }
-          } catch (parseError) {
-            errorMsg = error.message
-          }
-        }
-        
-        setErrorMessage(errorMsg)
+      } catch (e: any) {
+        setVideoCount(0);
+        setTotalViews(0);
+        setErrorMessage(e.message || String(e));
       } finally {
-        setIsLoading(false)
+        setIsLoading(false);
       }
     }
 
@@ -149,6 +136,19 @@ function AuthenticatedViewsCard() {
           {videoCount} video{videoCount !== 1 ? 's' : ''} counted
         </div>
 
+        {!isLoading && !errorMessage && videoCount === 0 && (
+          <div className="bg-yellow-500/20 border border-yellow-500/30 rounded-lg p-4 mb-4">
+            <div className="flex items-center">
+              <svg className="w-5 h-5 text-yellow-400 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+              </svg>
+              <span className="text-yellow-400 text-sm font-medium">
+                No videos found in response
+              </span>
+            </div>
+          </div>
+        )}
+        
         {errorMessage && (
           <div className="bg-red-500/20 border border-red-500/30 rounded-lg p-4 mb-4">
             <div className="flex items-center">

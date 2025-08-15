@@ -1,4 +1,7 @@
 // Docs: /v2/video/list (?fields=...) and /v2/video/query (?fields=... view_count/like_count/etc.)
+export const runtime = 'nodejs';
+export const dynamic = 'force-dynamic';
+
 import { NextRequest, NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
 
@@ -22,10 +25,11 @@ async function tiktokList(token: string, fields: string[], cursor=0, max_count=2
   return { ok: resp.ok, status: resp.status, json };
 }
 
-export async function POST(req: NextRequest) {
+// ---- Move the existing POST body into this function ----
+async function handle(request: NextRequest): Promise<NextResponse> {
   try {
     const cookieAccess = cookies().get('tt_access')?.value;
-    const body = await req.json().catch(() => ({} as any));
+    const body = await request.json().catch(() => ({} as any));
     const access = body.access_token ?? cookieAccess;
     const cursor = Number(body.cursor ?? 0) || 0;
     const max_count = Number(body.max_count ?? 20) || 20;
@@ -95,4 +99,14 @@ export async function POST(req: NextRequest) {
   } catch (e:any) {
     return NextResponse.json({ error:'Server error', details:String(e) }, { status:500 });
   }
+}
+
+// Keep POST
+export async function POST(request: NextRequest) {
+  return handle(request);
+}
+
+// New: GET for easy manual testing in the browser
+export async function GET(request: NextRequest) {
+  return handle(request);
 }
