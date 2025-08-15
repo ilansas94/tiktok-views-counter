@@ -8,8 +8,17 @@ const defaultFields = [
   'duration',
   'cover_image_url',
   'share_url',
-  'statistics',
+  // request specific stats subfields (not "statistics")
+  'statistics.view_count',
+  'statistics.like_count',
+  'statistics.comment_count',
+  'statistics.share_count',
 ]
+
+// Helper function to sum view counts from videos
+function sumViews(videos: any[]) {
+  return videos.reduce((sum, v) => sum + (v?.statistics?.view_count ?? 0), 0)
+}
 
 export async function POST(request: NextRequest) {
   try {
