@@ -9,11 +9,25 @@ export async function POST(request: NextRequest) {
   try {
     const cookieStore = cookies()
     const cookieAccess = cookieStore.get('tt_access')?.value
-    const { access_token = cookieAccess, cursor = 0, max_count = 20 } = await request.json() || {}
+    const body = await request.json().catch(() => ({}))
+    const { access_token = cookieAccess, cursor = 0, max_count = 20, fields: clientFields } = body
 
     if (!access_token) {
       return NextResponse.json({ error: 'Missing access_token (cookie or body)' }, { status: 400 })
     }
+
+    // Use client fields if provided, otherwise use default fields
+    const fields = Array.isArray(clientFields) && clientFields.length
+      ? clientFields
+      : [
+          'id',
+          'title',
+          'create_time',
+          'duration',
+          'cover_image_url',
+          'share_url',
+          'statistics', // contains view_count, like_count, etc.
+        ]
 
     const tiktok = await fetch('https://open.tiktokapis.com/v2/video/list/', {
       method: 'POST',
@@ -21,7 +35,11 @@ export async function POST(request: NextRequest) {
         'Authorization': `Bearer ${access_token}`,
         'Content-Type': 'application/json'
       },
-      body: JSON.stringify({ cursor: Number(cursor) || 0, max_count: Number(max_count) || 20 })
+      body: JSON.stringify({
+        cursor: Number(cursor) || 0,
+        max_count: Number(max_count) || 20,
+        fields, // <-- required
+      })
     })
 
     const payload = await tiktok.json()
