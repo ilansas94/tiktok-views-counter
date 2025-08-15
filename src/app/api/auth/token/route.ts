@@ -18,9 +18,12 @@ export async function POST(request: NextRequest) {
       }, { status: 500 })
     }
 
+    const redirectUri = `${baseUrl}/auth/callback`
+    
     console.log('Attempting token exchange with:', {
       clientKey: clientKey.substring(0, 8) + '...',
       baseUrl,
+      redirectUri,
       code: code.substring(0, 10) + '...',
       hasCodeVerifier: !!codeVerifier
     })
@@ -30,7 +33,7 @@ export async function POST(request: NextRequest) {
       client_secret: clientSecret,
       code: code,
       grant_type: 'authorization_code',
-      redirect_uri: `${baseUrl}/auth/callback`
+      redirect_uri: redirectUri
     }
 
     // Add code_verifier if available (for PKCE)
@@ -61,7 +64,20 @@ export async function POST(request: NextRequest) {
     }
 
     const data = await response.json()
-    console.log('Token exchange successful, access token received')
+    console.log('Token exchange response from TikTok:', {
+      hasData: !!data,
+      dataKeys: Object.keys(data || {}),
+      hasAccessToken: !!data?.access_token,
+      accessTokenLength: data?.access_token?.length || 0
+    })
+    
+    if (!data || !data.access_token) {
+      console.error('No access token in TikTok response:', data)
+      return NextResponse.json({ 
+        error: 'No access token received from TikTok',
+        details: data
+      }, { status: 400 })
+    }
     
     return NextResponse.json({ 
       access_token: data.access_token,
