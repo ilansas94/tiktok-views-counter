@@ -1,27 +1,29 @@
 'use client'
 
 import { useEffect } from 'react'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 
 export default function LoginPage() {
   const router = useRouter()
+  const searchParams = useSearchParams()
   const clientKey = process.env.NEXT_PUBLIC_TIKTOK_CLIENT_KEY
   const scopes = process.env.NEXT_PUBLIC_TIKTOK_SCOPES
+  const isDebug = searchParams.get('debug') === 'true'
 
   useEffect(() => {
     const handleAuth = async () => {
       if (clientKey) {
         try {
-          // Generate state parameter
-          const state = Math.random().toString(36).substring(7)
+          // Generate state parameter - use 'debug' for debugging, random for production
+          const state = isDebug ? 'debug' : Math.random().toString(36).substring(7)
           
           // Construct TikTok OAuth URL
           const authUrl = new URL('https://www.tiktok.com/v2/auth/authorize/')
           authUrl.searchParams.set('client_key', clientKey)
           authUrl.searchParams.set('response_type', 'code')
           authUrl.searchParams.set('scope', 'user.info.basic,video.list')
-          authUrl.searchParams.set('redirect_uri', 'https://tiktok-views-counter.vercel.app/api/auth/callback')
+          authUrl.searchParams.set('redirect_uri', `${window.location.origin}/api/auth/callback`)
           authUrl.searchParams.set('state', state)
           
           // Redirect to TikTok OAuth
@@ -33,7 +35,7 @@ export default function LoginPage() {
     }
 
     handleAuth()
-  }, [clientKey, scopes, router])
+  }, [clientKey, scopes, router, isDebug])
 
   // If clientKey is missing, render error message
   if (!clientKey) {
@@ -86,8 +88,22 @@ export default function LoginPage() {
         <div className="card">
           <div className="text-center">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-tiktok-primary mx-auto mb-4"></div>
-            <h1 className="text-xl font-bold mb-2">Redirecting to TikTok...</h1>
-            <p className="text-gray-400">Please wait while we redirect you to TikTok for authorization.</p>
+            <h1 className="text-xl font-bold mb-2">
+              {isDebug ? 'Debug Mode: Redirecting to TikTok...' : 'Redirecting to TikTok...'}
+            </h1>
+            <p className="text-gray-400">
+              {isDebug 
+                ? 'Debug mode enabled. You will see raw JSON response instead of redirect.'
+                : 'Please wait while we redirect you to TikTok for authorization.'
+              }
+            </p>
+            {isDebug && (
+              <div className="mt-4 p-3 bg-yellow-500/20 border border-yellow-500/30 rounded-lg">
+                <p className="text-yellow-400 text-sm">
+                  Debug mode: State parameter set to "debug"
+                </p>
+              </div>
+            )}
           </div>
         </div>
       </div>

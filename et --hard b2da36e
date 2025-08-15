@@ -1,0 +1,10 @@
+[33m108ab16[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m, [m[1;31morigin/main[m[33m, [m[1;31morigin/HEAD[m[33m)[m Restore video.list scope - it was working fine, don't break what works
+[33md369931[m Test: Remove video.list scope to debug OAuth for accounts with no videos
+[33m3e4c16f[m Add detailed OAuth debugging to identify user-specific authentication issues
+[33m6514057[m Fix OAuth configuration: use environment variables for scopes and redirect URI
+[33mb2da36e[m Increase refresh delay to 6 seconds for leaderboard update
+[33mf7cc0f1[m Increase refresh delay to 3 seconds for leaderboard update
+[33m81f8783[m Add: Auto-refresh page after successful leaderboard submission
+[33m9052cdd[m Improve: Replace debug-style alerts with professional toast notifications
+[33m26fc887[m Fix: Add username field to debug whoami API to resolve leaderboard submission error
+[33m2ebba63[m Fix ESLint errors: escape apostrophes in Leaderboard component
