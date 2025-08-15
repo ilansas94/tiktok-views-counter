@@ -2,8 +2,10 @@
 
 import Link from 'next/link'
 import { useState, useEffect } from 'react'
+import { useRouter } from 'next/navigation'
 
 export default function Header() {
+  const router = useRouter()
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const [userInfo, setUserInfo] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
@@ -27,6 +29,22 @@ export default function Header() {
 
     checkAuth()
   }, [])
+
+  const handleLogout = async () => {
+    try {
+      const response = await fetch('/api/auth/logout', {
+        method: 'GET',
+      })
+      if (response.ok) {
+        // Clear local state
+        setUserInfo(null)
+        // Redirect to home page
+        router.push('/')
+      }
+    } catch (error) {
+      console.error('Logout error:', error)
+    }
+  }
 
   return (
     <header className="sticky top-0 z-50 bg-tiktok-dark/95 backdrop-blur-sm border-b border-gray-700">
@@ -64,9 +82,12 @@ export default function Header() {
                       />
                       <span className="text-gray-300 text-sm">{userInfo.display_name}</span>
                     </div>
-                    <Link href="/api/auth/logout" className="text-gray-400 hover:text-white transition-colors text-sm">
+                    <button 
+                      onClick={handleLogout}
+                      className="text-gray-400 hover:text-white transition-colors text-sm"
+                    >
                       Logout
-                    </Link>
+                    </button>
                   </div>
                 ) : (
                   <Link href="/auth/login" className="btn-primary">
@@ -137,13 +158,15 @@ export default function Header() {
                         />
                         <span className="text-gray-300 text-sm">{userInfo.display_name}</span>
                       </div>
-                      <Link
-                        href="/api/auth/logout"
-                        className="block px-3 py-2 text-gray-400 hover:text-white hover:bg-gray-700 rounded-md text-sm"
-                        onClick={() => setIsMenuOpen(false)}
+                      <button
+                        onClick={() => {
+                          handleLogout()
+                          setIsMenuOpen(false)
+                        }}
+                        className="block w-full text-left px-3 py-2 text-gray-400 hover:text-white hover:bg-gray-700 rounded-md text-sm"
                       >
                         Logout
-                      </Link>
+                      </button>
                     </>
                   ) : (
                     <Link
