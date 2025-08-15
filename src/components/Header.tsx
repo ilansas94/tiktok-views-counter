@@ -18,6 +18,7 @@ export default function Header() {
           const data = await response.json()
           console.log('Header - Whoami API response:', data) // Debug log
           if (data.ok && data.data?.data) {
+            console.log('User data structure:', data.data.data) // Debug the actual user data
             setUserInfo(data.data.data)
           }
         }
@@ -79,7 +80,7 @@ export default function Header() {
                       <div className="w-8 h-8 rounded-full border-2 border-tiktok-primary overflow-hidden bg-gray-700 flex items-center justify-center">
                         {userInfo.avatar_url ? (
                           <img 
-                            src={userInfo.avatar_url} 
+                            src={`/api/avatar?url=${encodeURIComponent(userInfo.avatar_url)}`}
                             alt={userInfo.display_name}
                             className="w-full h-full object-cover"
                             onError={(e) => {
@@ -172,7 +173,7 @@ export default function Header() {
                         <div className="w-6 h-6 rounded-full border border-tiktok-primary overflow-hidden bg-gray-700 flex items-center justify-center">
                           {userInfo.avatar_url ? (
                             <img 
-                              src={userInfo.avatar_url} 
+                              src={`/api/avatar?url=${encodeURIComponent(userInfo.avatar_url)}`}
                               alt={userInfo.display_name}
                               className="w-full h-full object-cover"
                               onError={(e) => {

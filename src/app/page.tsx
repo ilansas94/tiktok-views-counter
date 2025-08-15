@@ -334,7 +334,7 @@ export default function Home() {
                   <div className="w-12 h-12 rounded-full border-2 border-tiktok-primary overflow-hidden bg-gray-700 flex items-center justify-center">
                     {userInfo.avatar_url ? (
                       <img 
-                        src={userInfo.avatar_url} 
+                        src={`/api/avatar?url=${encodeURIComponent(userInfo.avatar_url)}`}
                         alt={userInfo.display_name}
                         className="w-full h-full object-cover"
                         onError={(e) => {
@@ -355,7 +355,7 @@ export default function Home() {
                   </div>
                   <div className="text-left">
                     <div className="text-white font-semibold">{userInfo.display_name}</div>
-                    <div className="text-gray-400 text-sm">Welcome back!</div>
+                    <div className="text-gray-400 text-sm">Welcome, {userInfo.display_name}!</div>
                   </div>
                 </div>
               </div>
