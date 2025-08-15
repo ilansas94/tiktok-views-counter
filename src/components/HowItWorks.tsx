@@ -44,13 +44,8 @@ export function HowItWorks() {
         <div className="grid md:grid-cols-3 gap-8">
           {steps.map((step, index) => (
             <div key={index} className="text-center group">
-              <div className="relative">
-                <div className="w-16 h-16 mx-auto mb-4 bg-gradient-to-r from-tiktok-primary to-tiktok-secondary rounded-full flex items-center justify-center text-white group-hover:scale-110 transition-transform duration-200">
-                  {step.icon}
-                </div>
-                {index < steps.length - 1 && (
-                  <div className="hidden md:block absolute top-8 left-full w-full h-0.5 bg-gradient-to-r from-tiktok-primary to-tiktok-secondary transform translate-x-4 opacity-30"></div>
-                )}
+              <div className="w-16 h-16 mx-auto mb-4 bg-gradient-to-r from-tiktok-primary to-tiktok-secondary rounded-full flex items-center justify-center text-white group-hover:scale-110 transition-transform duration-200">
+                {step.icon}
               </div>
               
               <h3 className="text-xl font-semibold mb-2">
