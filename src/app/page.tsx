@@ -28,8 +28,26 @@ function AuthenticatedViewsCard() {
   const [debugInfo, setDebugInfo] = useState<any>(null)
   const [whoamiInfo, setWhoamiInfo] = useState<any>(null)
   const [statusInfo, setStatusInfo] = useState<any>(null)
+  const [userInfo, setUserInfo] = useState<any>(null)
+  const [isAuthLoading, setIsAuthLoading] = useState(true)
 
   useEffect(() => {
+    async function checkAuth() {
+      try {
+        const response = await fetch('/api/debug/whoami')
+        if (response.ok) {
+          const data = await response.json()
+          if (data.ok && data.data?.data) {
+            setUserInfo(data.data.data)
+          }
+        }
+      } catch (error) {
+        console.error('Error checking auth:', error)
+      } finally {
+        setIsAuthLoading(false)
+      }
+    }
+
     async function loadVideos() {
       setErrorMessage('')
       setDebugInfo(null)
@@ -89,6 +107,7 @@ function AuthenticatedViewsCard() {
       }
     }
 
+    checkAuth()
     loadVideos()
   }, [])
 
@@ -219,17 +238,56 @@ function AuthenticatedViewsCard() {
           </div>
         )}
 
-        <div className="mt-4">
-          <Link href="/auth/login" className="btn-primary w-full block">
-            Login with TikTok
-          </Link>
-        </div>
+        {!isAuthLoading && !userInfo && (
+          <div className="mt-4">
+            <Link href="/auth/login" className="btn-primary w-full block">
+              Login with TikTok
+            </Link>
+          </div>
+        )}
+        
+        {!isAuthLoading && userInfo && (
+          <div className="mt-4">
+            <div className="text-sm text-gray-400 mb-2">
+              Logged in as: {userInfo.display_name}
+            </div>
+            <button
+              onClick={handleHardLogout}
+              className="btn-secondary w-full block"
+            >
+              Logout
+            </button>
+          </div>
+        )}
       </div>
     </div>
   )
 }
 
 export default function Home() {
+  const [userInfo, setUserInfo] = useState<any>(null)
+  const [isAuthLoading, setIsAuthLoading] = useState(true)
+
+  useEffect(() => {
+    async function checkAuth() {
+      try {
+        const response = await fetch('/api/debug/whoami')
+        if (response.ok) {
+          const data = await response.json()
+          if (data.ok && data.data?.data) {
+            setUserInfo(data.data.data)
+          }
+        }
+      } catch (error) {
+        console.error('Error checking auth:', error)
+      } finally {
+        setIsAuthLoading(false)
+      }
+    }
+
+    checkAuth()
+  }, [])
+
   return (
     <div className="min-h-screen">
       {/* Hero Section */}
@@ -252,14 +310,32 @@ export default function Home() {
               Connect your account to see the sum of views across all your videos.
             </p>
             
-            <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-16 animate-slide-up">
-              <Link href="/auth/login" className="btn-primary text-lg px-8 py-4">
-                Login with TikTok
-              </Link>
-              <span className="text-gray-400 text-sm">
-                Free • No data stored • Secure OAuth
-              </span>
-            </div>
+            {!isAuthLoading && !userInfo && (
+              <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-16 animate-slide-up">
+                <Link href="/auth/login" className="btn-primary text-lg px-8 py-4">
+                  Login with TikTok
+                </Link>
+                <span className="text-gray-400 text-sm">
+                  Free • No data stored • Secure OAuth
+                </span>
+              </div>
+            )}
+            
+            {!isAuthLoading && userInfo && (
+              <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-16 animate-slide-up">
+                <div className="flex items-center space-x-3">
+                  <img 
+                    src={userInfo.avatar_url} 
+                    alt={userInfo.display_name}
+                    className="w-12 h-12 rounded-full border-2 border-tiktok-primary"
+                  />
+                  <div className="text-left">
+                    <div className="text-white font-semibold">{userInfo.display_name}</div>
+                    <div className="text-gray-400 text-sm">Welcome back!</div>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
         </div>
       </section>
