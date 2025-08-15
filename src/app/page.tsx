@@ -4,6 +4,7 @@ import Link from 'next/link'
 import { ViewsCard } from '@/components/ViewsCard'
 import { HowItWorks } from '@/components/HowItWorks'
 import { useEffect, useState } from 'react'
+import { useRouter } from 'next/navigation'
 
 async function fetchVideos(cursor = 0) {
   const r = await fetch('/api/videos', {
@@ -17,12 +18,15 @@ async function fetchVideos(cursor = 0) {
 }
 
 function AuthenticatedViewsCard() {
+  const router = useRouter()
   const [totalViews, setTotalViews] = useState(0)
   const [videoCount, setVideoCount] = useState(0)
   const [isLiveData, setIsLiveData] = useState(false)
   const [errorMessage, setErrorMessage] = useState('')
   const [isLoading, setIsLoading] = useState(true)
   const [debugInfo, setDebugInfo] = useState<any>(null)
+  const [whoamiInfo, setWhoamiInfo] = useState<any>(null)
+  const [statusInfo, setStatusInfo] = useState<any>(null)
 
   useEffect(() => {
     async function loadVideos() {
@@ -45,13 +49,23 @@ function AuthenticatedViewsCard() {
         } else {
           setErrorMessage('No videos found in response')
           
-          // Fetch debug info when no videos found
+          // Fetch diagnostic info when no videos found
           try {
-            const debugResponse = await fetch('/api/tiktok/debug')
+            const [debugResponse, whoamiResponse, statusResponse] = await Promise.all([
+              fetch('/api/tiktok/debug'),
+              fetch('/api/tiktok/whoami'),
+              fetch('/api/tiktok/status')
+            ])
+            
             const debugData = await debugResponse.json()
+            const whoamiData = await whoamiResponse.json()
+            const statusData = await statusResponse.json()
+            
             setDebugInfo(debugData)
+            setWhoamiInfo(whoamiData)
+            setStatusInfo(statusData)
           } catch (debugError) {
-            console.error('Debug fetch failed:', debugError)
+            console.error('Diagnostic fetch failed:', debugError)
           }
         }
       } catch (error) {
@@ -90,6 +104,15 @@ function AuthenticatedViewsCard() {
 
     loadVideos()
   }, [])
+
+  const handleHardLogout = async () => {
+    try {
+      await fetch('/api/session/logout', { method: 'POST' })
+      router.push('/auth/login')
+    } catch (error) {
+      console.error('Hard logout failed:', error)
+    }
+  }
 
   if (isLoading) {
     return (
@@ -139,20 +162,58 @@ function AuthenticatedViewsCard() {
           </div>
         )}
 
-        {/* Diagnostic hints when count === 0 */}
+        {/* Enhanced diagnostic hints when videos.length === 0 */}
         {debugInfo && debugInfo.count === 0 && (
           <div className="bg-blue-500/20 border border-blue-500/30 rounded-lg p-4 mb-4">
             <div className="flex items-start">
               <svg className="w-5 h-5 text-blue-400 mr-2 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
                 <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
               </svg>
-              <div className="text-blue-400 text-sm">
-                <div className="font-medium mb-2">Troubleshooting Tips:</div>
-                <ul className="space-y-1 text-xs">
-                  <li>• If your app is in Sandbox, TikTok only returns data for accounts listed under your app&apos;s Sandbox → Target Users (and usually also Testers). Add the exact username you logged in with, wait a few minutes, then logout/login.</li>
-                  <li>• Confirm scopes: user.info.basic, video.list</li>
-                  <li>• Confirm you logged in with the same app whose client key the server uses.</li>
-                </ul>
+              <div className="text-blue-400 text-sm w-full">
+                <div className="font-medium mb-2">Diagnostic Information:</div>
+                
+                {/* List mode and fieldset info */}
+                {debugInfo.list_mode && (
+                  <div className="mb-2 text-xs">
+                    <span className="font-medium">List mode used:</span> {debugInfo.list_mode}
+                    {debugInfo.fieldset_used && (
+                      <span className="ml-2">
+                        <span className="font-medium">Fields:</span> {debugInfo.fieldset_used.join(', ')}
+                      </span>
+                    )}
+                  </div>
+                )}
+
+                {/* Username from whoami */}
+                {whoamiInfo?.raw?.data?.user?.username && (
+                  <div className="mb-2 text-xs">
+                    <span className="font-medium">Username:</span> {whoamiInfo.raw.data.user.username}
+                  </div>
+                )}
+
+                {/* Client key info */}
+                {statusInfo?.client_key && (
+                  <div className="mb-2 text-xs">
+                    <span className="font-medium">Client key:</span> {statusInfo.client_key}
+                  </div>
+                )}
+
+                <div className="mt-3 pt-2 border-t border-blue-500/30">
+                  <div className="font-medium mb-1">Troubleshooting Steps:</div>
+                  <ul className="space-y-1 text-xs">
+                    <li>• If your app is in Sandbox, TikTok only returns data for accounts listed under Sandbox → Target Users. Add the exact username shown above, then logout and login again.</li>
+                    <li>• If list_mode=minimal returns videos → it was a field restriction; keep minimal fields.</li>
+                    <li>• If both modes return 0 → it&apos;s Sandbox targeting or wrong account.</li>
+                  </ul>
+                </div>
+
+                {/* Hard logout button */}
+                <button
+                  onClick={handleHardLogout}
+                  className="mt-3 px-3 py-1 bg-red-500/20 border border-red-500/30 text-red-400 text-xs rounded hover:bg-red-500/30 transition-colors"
+                >
+                  Hard Logout & Re-auth
+                </button>
               </div>
             </div>
           </div>
