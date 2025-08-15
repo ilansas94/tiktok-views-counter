@@ -20,7 +20,7 @@ export default function LoginPage() {
           const authUrl = new URL('https://www.tiktok.com/v2/auth/authorize/')
           authUrl.searchParams.set('client_key', clientKey)
           authUrl.searchParams.set('response_type', 'code')
-          authUrl.searchParams.set('scope', scopes || 'user.info.basic,video.list,user.info.profile')
+          authUrl.searchParams.set('scope', 'user.info.basic,video.list')
           authUrl.searchParams.set('redirect_uri', 'https://tiktok-views-counter.vercel.app/api/auth/callback')
           authUrl.searchParams.set('state', state)
           

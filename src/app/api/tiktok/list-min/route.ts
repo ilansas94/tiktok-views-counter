@@ -1,16 +1,13 @@
-// app/api/tiktok/debug/route.ts
+// app/api/tiktok/list-min/route.ts
 import { NextRequest, NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
-
-const fields = ['id','title','create_time','duration','cover_image_url','share_url'];
 
 export async function GET() {
   try {
     const token = cookies().get('tt_access')?.value;
     if (!token) return NextResponse.json({ ok:false, error:'Missing tt_access cookie' }, { status:400 });
 
-    const params = new URLSearchParams({ fields: fields.join(',') });
-    const url = `https://open.tiktokapis.com/v2/video/list/?${params.toString()}`;
+    const url = 'https://open.tiktokapis.com/v2/video/list/?fields=id,share_url';
     const body = { cursor: 0, max_count: 20 };
 
     const resp = await fetch(url, {
@@ -28,9 +25,8 @@ export async function GET() {
     return NextResponse.json({
       ok: resp.ok,
       status: resp.status,
-      sent: { fields: fields.join(','), body },
+      sent: { fields: 'id,share_url', body },
       count: videos.length,
-      has_more: json?.data?.has_more ?? null,
       sample_ids: videos.slice(0,5).map((v:any)=>v.id),
       raw: json,
     });
