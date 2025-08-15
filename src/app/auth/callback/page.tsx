@@ -51,7 +51,17 @@ async function exchangeCodeForToken(code: string): Promise<string | null> {
     }
 
     const data = await response.json()
-    console.log('Token exchange successful, access token received')
+    console.log('Token exchange successful, access token received:', {
+      hasAccessToken: !!data.access_token,
+      accessTokenLength: data.access_token?.length || 0,
+      responseData: data
+    })
+    
+    if (!data.access_token) {
+      console.error('No access token in response:', data)
+      return null
+    }
+    
     return data.access_token
   } catch (error) {
     console.error('Error exchanging code for token:', error)
@@ -121,6 +131,7 @@ function CallbackContent() {
       const accessToken = await exchangeCodeForToken(code)
       
       if (accessToken) {
+        console.log('Access token received, fetching videos...')
         // Fetch video data
         const videoData = await fetchVideos(accessToken)
         
@@ -128,11 +139,14 @@ function CallbackContent() {
           setTotalViews(videoData.totalViews)
           setVideoCount(videoData.videoCount)
           setIsLiveData(true)
+          console.log('Live data set successfully')
         } else {
           setErrorMessage('Unable to fetch live data — this is expected in sandbox mode. Showing sample data instead.')
           setErrorType('video_fetch_error')
+          console.log('Video fetch failed, showing sample data')
         }
       } else {
+        console.log('Token exchange failed, access token is null')
         setErrorMessage('Unable to authenticate — please check your TikTok app configuration.')
         setErrorType('token_error')
       }
