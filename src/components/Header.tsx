@@ -16,6 +16,7 @@ export default function Header() {
         const response = await fetch('/api/debug/whoami')
         if (response.ok) {
           const data = await response.json()
+          console.log('Header - Whoami API response:', data) // Debug log
           if (data.ok && data.data?.data) {
             setUserInfo(data.data.data)
           }
@@ -75,11 +76,28 @@ export default function Header() {
                 {userInfo ? (
                   <div className="flex items-center space-x-4">
                     <div className="flex items-center space-x-2">
-                      <img 
-                        src={userInfo.avatar_url} 
-                        alt={userInfo.display_name}
-                        className="w-8 h-8 rounded-full border-2 border-tiktok-primary"
-                      />
+                      <div className="w-8 h-8 rounded-full border-2 border-tiktok-primary overflow-hidden bg-gray-700 flex items-center justify-center">
+                        {userInfo.avatar_url ? (
+                          <img 
+                            src={userInfo.avatar_url} 
+                            alt={userInfo.display_name}
+                            className="w-full h-full object-cover"
+                            onError={(e) => {
+                              // Fallback to initials if image fails to load
+                              const target = e.target as HTMLImageElement;
+                              target.style.display = 'none';
+                              const parent = target.parentElement;
+                              if (parent) {
+                                parent.innerHTML = `<div class="text-white font-bold text-xs">${userInfo.display_name?.charAt(0) || 'U'}</div>`;
+                              }
+                            }}
+                          />
+                        ) : (
+                          <div className="text-white font-bold text-xs">
+                            {userInfo.display_name?.charAt(0) || 'U'}
+                          </div>
+                        )}
+                      </div>
                       <span className="text-gray-300 text-sm">{userInfo.display_name}</span>
                     </div>
                     <button 
@@ -151,11 +169,28 @@ export default function Header() {
                   {userInfo ? (
                     <>
                       <div className="flex items-center space-x-2 px-3 py-2">
-                        <img 
-                          src={userInfo.avatar_url} 
-                          alt={userInfo.display_name}
-                          className="w-6 h-6 rounded-full border border-tiktok-primary"
-                        />
+                        <div className="w-6 h-6 rounded-full border border-tiktok-primary overflow-hidden bg-gray-700 flex items-center justify-center">
+                          {userInfo.avatar_url ? (
+                            <img 
+                              src={userInfo.avatar_url} 
+                              alt={userInfo.display_name}
+                              className="w-full h-full object-cover"
+                              onError={(e) => {
+                                // Fallback to initials if image fails to load
+                                const target = e.target as HTMLImageElement;
+                                target.style.display = 'none';
+                                const parent = target.parentElement;
+                                if (parent) {
+                                  parent.innerHTML = `<div class="text-white font-bold text-xs">${userInfo.display_name?.charAt(0) || 'U'}</div>`;
+                                }
+                              }}
+                            />
+                          ) : (
+                            <div className="text-white font-bold text-xs">
+                              {userInfo.display_name?.charAt(0) || 'U'}
+                            </div>
+                          )}
+                        </div>
                         <span className="text-gray-300 text-sm">{userInfo.display_name}</span>
                       </div>
                       <button

@@ -331,11 +331,28 @@ export default function Home() {
             {!isAuthLoading && userInfo && (
               <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-16 animate-slide-up">
                 <div className="flex items-center space-x-3">
-                  <img 
-                    src={userInfo.avatar_url} 
-                    alt={userInfo.display_name}
-                    className="w-12 h-12 rounded-full border-2 border-tiktok-primary"
-                  />
+                  <div className="w-12 h-12 rounded-full border-2 border-tiktok-primary overflow-hidden bg-gray-700 flex items-center justify-center">
+                    {userInfo.avatar_url ? (
+                      <img 
+                        src={userInfo.avatar_url} 
+                        alt={userInfo.display_name}
+                        className="w-full h-full object-cover"
+                        onError={(e) => {
+                          // Fallback to initials if image fails to load
+                          const target = e.target as HTMLImageElement;
+                          target.style.display = 'none';
+                          const parent = target.parentElement;
+                          if (parent) {
+                            parent.innerHTML = `<div class="text-white font-bold text-lg">${userInfo.display_name?.charAt(0) || 'U'}</div>`;
+                          }
+                        }}
+                      />
+                    ) : (
+                      <div className="text-white font-bold text-lg">
+                        {userInfo.display_name?.charAt(0) || 'U'}
+                      </div>
+                    )}
+                  </div>
                   <div className="text-left">
                     <div className="text-white font-semibold">{userInfo.display_name}</div>
                     <div className="text-gray-400 text-sm">Welcome back!</div>
