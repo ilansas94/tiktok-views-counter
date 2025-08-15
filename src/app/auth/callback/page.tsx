@@ -39,25 +39,17 @@ function CallbackContent() {
 
       console.log('Received code:', code ? code.substring(0, 20) + '...' : 'NO CODE')
       
+      // If we have a code, the OAuth callback should handle it
+      // If no code, we might be here after the OAuth callback redirected us
       if (!code) {
-        setErrorMessage('Invalid callback. Please try logging in again.')
-        setErrorType('invalid_callback')
-        setIsLoading(false)
-        return
+        console.log('No code in URL, checking if cookies are set...')
+        // Continue to loadVideos which will check for cookies
       }
 
-      // The OAuth callback should have already set cookies and redirected
-      // If we're here, it means the callback didn't work properly
-      setErrorMessage('OAuth callback failed. Please try logging in again.')
-      setErrorType('callback_error')
-      setIsLoading(false)
+      // Always try to load videos (cookies should be set by OAuth callback)
+      await loadVideos()
     }
 
-    processCallback()
-  }, [searchParams])
-
-  // Try to fetch videos on mount (cookies should be set by OAuth callback)
-  useEffect(() => {
     async function loadVideos() {
       try {
         const videoData = await fetchVideos()
@@ -88,10 +80,8 @@ function CallbackContent() {
       }
     }
 
-    // Small delay to ensure cookies are set
-    const timer = setTimeout(loadVideos, 1000)
-    return () => clearTimeout(timer)
-  }, [])
+    processCallback()
+  }, [searchParams])
 
   if (isLoading) {
     return (

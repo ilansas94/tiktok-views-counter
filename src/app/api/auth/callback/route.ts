@@ -34,7 +34,7 @@ export async function GET(request: NextRequest) {
     }
 
     const maxAge = (data.expires_in || 3600).toString()
-    const response = NextResponse.redirect(new URL('/', request.url))
+    const response = NextResponse.redirect(new URL('/auth/callback', request.url))
     
     response.cookies.set('tt_access', data.access_token, {
       path: '/',
