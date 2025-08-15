@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 
+// Force redeploy to ensure API route is properly deployed
 export async function POST(request: NextRequest) {
   try {
     const { accessToken } = await request.json()
