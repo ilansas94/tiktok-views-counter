@@ -4,6 +4,7 @@ import Link from 'next/link'
 import { ViewsCard } from '@/components/ViewsCard'
 import { HowItWorks } from '@/components/HowItWorks'
 import { Leaderboard } from '@/components/Leaderboard'
+import { Toast } from '@/components/Toast'
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 
@@ -31,6 +32,11 @@ function AuthenticatedViewsCard() {
   const [statusInfo, setStatusInfo] = useState<any>(null)
   const [userInfo, setUserInfo] = useState<any>(null)
   const [isAuthLoading, setIsAuthLoading] = useState(true)
+  const [toast, setToast] = useState<{ message: string; type: 'success' | 'error'; isVisible: boolean }>({
+    message: '',
+    type: 'success',
+    isVisible: false
+  })
 
   useEffect(() => {
     async function checkAuth() {
@@ -141,8 +147,15 @@ function AuthenticatedViewsCard() {
   }
 
   return (
-    <div className="card max-w-md w-full">
-      <div className="text-center">
+    <>
+      <Toast
+        message={toast.message}
+        type={toast.type}
+        isVisible={toast.isVisible}
+        onClose={() => setToast(prev => ({ ...prev, isVisible: false }))}
+      />
+      <div className="card max-w-md w-full">
+        <div className="text-center">
         {!isAuthLoading && userInfo && (
           <div className="mb-4">
             <div className="w-16 h-16 mx-auto rounded-full border-2 border-tiktok-primary overflow-hidden bg-gray-700 flex items-center justify-center">
@@ -308,13 +321,25 @@ function AuthenticatedViewsCard() {
                   
                   const data = await response.json()
                   if (data.success) {
-                    alert(`Successfully submitted to leaderboard! Your rank: #${data.user_rank}`)
+                    setToast({
+                      message: `Congratulations! You're now ranked #${data.user_rank} on the leaderboard!`,
+                      type: 'success',
+                      isVisible: true
+                    })
                   } else {
-                    alert('Failed to submit to leaderboard: ' + data.error)
+                    setToast({
+                      message: `Unable to submit to leaderboard: ${data.error}`,
+                      type: 'error',
+                      isVisible: true
+                    })
                   }
                 } catch (error) {
                   console.error('Error submitting to leaderboard:', error)
-                  alert('Failed to submit to leaderboard')
+                  setToast({
+                    message: 'Failed to submit to leaderboard. Please try again.',
+                    type: 'error',
+                    isVisible: true
+                  })
                 }
               }}
               className="btn-primary w-full block"
@@ -332,6 +357,7 @@ function AuthenticatedViewsCard() {
         )}
       </div>
     </div>
+    </>
   )
 }
 
