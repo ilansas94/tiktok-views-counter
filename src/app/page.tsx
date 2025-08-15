@@ -1,8 +1,8 @@
 import Link from 'next/link'
 import Header from '@/components/Header'
 import Footer from '@/components/Footer'
-import HowItWorks from '@/components/HowItWorks'
-import ViewsCard from '@/components/ViewsCard'
+import { HowItWorks } from '@/components/HowItWorks'
+import { ViewsCard } from '@/components/ViewsCard'
 
 export default function HomePage() {
   // Deployment v2.1.0 - API endpoint fixes
