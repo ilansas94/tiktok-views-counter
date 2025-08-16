@@ -6,7 +6,7 @@ import { HowItWorks } from '@/components/HowItWorks'
 import { Leaderboard } from '@/components/Leaderboard'
 import { Toast } from '@/components/Toast'
 import { LoginButton } from '@/components/LoginButton'
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import { cookieHas, deriveUsernameFromVideos } from '@/lib/utils'
 
@@ -127,7 +127,7 @@ function AuthenticatedViewsCard() {
   }, [])
 
   // Check if user is on leaderboard
-  const checkLeaderboardStatus = async () => {
+  const checkLeaderboardStatus = useCallback(async () => {
     if (!userInfo?.username) return
     
     setIsCheckingLeaderboardStatus(true)
@@ -147,7 +147,7 @@ function AuthenticatedViewsCard() {
     } finally {
       setIsCheckingLeaderboardStatus(false)
     }
-  }
+  }, [userInfo?.username])
 
   // Remove from leaderboard
   const removeFromLeaderboard = async () => {
@@ -190,7 +190,7 @@ function AuthenticatedViewsCard() {
     if (userInfo?.username) {
       checkLeaderboardStatus()
     }
-  }, [userInfo?.username])
+  }, [userInfo?.username, checkLeaderboardStatus])
 
   const handleLogout = async () => {
     try {

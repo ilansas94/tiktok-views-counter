@@ -22,7 +22,7 @@ export default function PrivacyPage() {
           <div className="prose prose-invert max-w-none">
             <div className="space-y-6 text-gray-300">
               <p>
-                {COMPANY_NAME} ("we", "us") provides a simple way to view the total views across your
+                {COMPANY_NAME} (&quot;we&quot;, &quot;us&quot;) provides a simple way to view the total views across your
                 TikTok account and optionally submit your total to a public leaderboard.
               </p>
 
@@ -81,7 +81,7 @@ export default function PrivacyPage() {
                     permissions → Apps &amp; websites → remove access.
                   </li>
                   <li>
-                    <strong>Delete leaderboard entry</strong>: use "Remove from Leaderboard" in the app or email us at {CONTACT_EMAIL}.
+                    <strong>Delete leaderboard entry</strong>: use &quot;Remove from Leaderboard&quot; in the app or email us at {CONTACT_EMAIL}.
                     We will delete within 7 days.
                   </li>
                 </ul>

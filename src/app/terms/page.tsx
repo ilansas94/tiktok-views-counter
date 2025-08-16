@@ -74,7 +74,7 @@ export default function TermsPage() {
               <section>
                 <h2 className="text-xl font-semibold mb-3 text-white">Disclaimers &amp; liability</h2>
                 <p>
-                  The service is provided "as is" without warranties. To the extent permitted by law, our liability is limited
+                  The service is provided &quot;as is&quot; without warranties. To the extent permitted by law, our liability is limited
                   to direct damages and capped at the greater of USD $50 or the amount you paid us in the last 12 months.
                 </p>
               </section>
