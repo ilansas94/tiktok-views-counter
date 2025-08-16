@@ -57,7 +57,7 @@ export default function Header() {
             <div className="w-8 h-8 bg-gradient-to-r from-tiktok-primary to-tiktok-secondary rounded-lg flex items-center justify-center">
               <span className="text-white font-bold text-sm">TV</span>
             </div>
-            <span className="text-xl font-bold gradient-text">TikTok Views</span>
+            <span className="text-xl font-bold gradient-text">TotalViews</span>
           </Link>
 
           {/* Desktop Navigation */}

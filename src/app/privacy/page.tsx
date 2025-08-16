@@ -1,7 +1,7 @@
 import Link from 'next/link'
 
 // Global configuration values
-const COMPANY_NAME = "TikTok Views Counter"
+const COMPANY_NAME = "TotalViews"
 const CONTACT_EMAIL = "ilansas94@gmail.com"
 const JURISDICTION = "Israel"
 const RETENTION_MONTHS = 12

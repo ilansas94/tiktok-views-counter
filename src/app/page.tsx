@@ -259,7 +259,7 @@ function AuthenticatedViewsCard() {
               )}
             </div>
             <div className="text-sm text-gray-400 mt-2">
-              {userInfo?.display_name || deriveUsernameFromVideos(videos) || 'TikTok User'}
+              {userInfo?.display_name || deriveUsernameFromVideos(videos) || 'User'}
             </div>
           </div>
         )}
@@ -378,7 +378,7 @@ function AuthenticatedViewsCard() {
                     const submissionData = {
                       username: userInfo?.username || deriveUsernameFromVideos(videos) || 'unknown',
                       totalViews: totalViews,
-                      displayName: userInfo?.display_name || deriveUsernameFromVideos(videos) || 'TikTok User',
+                      displayName: userInfo?.display_name || deriveUsernameFromVideos(videos) || 'User',
                       avatarUrl: userInfo?.avatar_url
                     }
                     

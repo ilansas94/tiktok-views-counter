@@ -10,7 +10,7 @@ export default function Footer() {
               <span className="text-white font-bold text-xs">TV</span>
             </div>
             <span className="text-sm text-gray-400">
-              © 2024 TikTok Views Counter. All rights reserved.
+              © 2024 TotalViews. All rights reserved.
             </span>
           </div>
           

@@ -1,4 +1,4 @@
-# TikTok Total Views Counter
+# TotalViews
 
 A modern web application that allows TikTok creators to view the total number of views across all their videos by connecting their TikTok account through official OAuth.
 

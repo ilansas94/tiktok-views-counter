@@ -1,4 +1,4 @@
-# Project Plan — TikTok Total Views
+# Project Plan — TotalViews
 
 ## Goal
 Build a public website that lets a TikTok creator log in (OAuth) and see a single number: the total views across all their videos. Launch the site first; plug in the official TikTok Display API after app approval.

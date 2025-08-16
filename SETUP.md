@@ -1,4 +1,4 @@
-# TikTok Views Counter - Setup Instructions
+# TotalViews - Setup Instructions
 
 ## Environment Variables Setup
 

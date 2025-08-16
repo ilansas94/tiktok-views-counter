@@ -7,12 +7,12 @@ import Footer from '@/components/Footer'
 const inter = Inter({ subsets: ['latin'] })
 
 export const metadata: Metadata = {
-  title: 'TikTok Total Views',
+  title: 'TotalViews',
   description: 'Tool for creators to log in and see total views across all their videos (sample until API approval).',
   keywords: ['TikTok', 'views', 'counter', 'creator', 'analytics'],
-  authors: [{ name: 'TikTok Views Counter' }],
+  authors: [{ name: 'TotalViews' }],
   openGraph: {
-    title: 'TikTok Total Views',
+    title: 'TotalViews',
     description: 'Tool for creators to log in and see total views across all their videos (sample until API approval).',
     type: 'website',
     images: [
@@ -20,13 +20,13 @@ export const metadata: Metadata = {
         url: '/logo.svg',
         width: 1200,
         height: 630,
-        alt: 'TikTok Total Views',
+        alt: 'TotalViews',
       },
     ],
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'TikTok Total Views',
+    title: 'TotalViews',
     description: 'Tool for creators to log in and see total views across all their videos (sample until API approval).',
     images: ['/logo.svg'],
   },
