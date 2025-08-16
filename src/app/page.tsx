@@ -403,12 +403,12 @@ function AuthenticatedViewsCard() {
                         type: 'success',
                         isVisible: true
                       })
-                      // Update leaderboard status
-                      setIsOnLeaderboard(true)
-                      // Refresh the page after 6 seconds to show updated leaderboard
-                      setTimeout(() => {
-                        window.location.reload()
-                      }, 6000)
+                                             // Update leaderboard status
+                       setIsOnLeaderboard(true)
+                       // Refresh the page after 2 seconds to show updated leaderboard
+                       setTimeout(() => {
+                         window.location.reload()
+                       }, 2000)
                     } else {
                       setToast({
                         message: `Unable to submit to leaderboard: ${data.error}`,
