@@ -1,5 +1,11 @@
 import Link from 'next/link'
 
+// Global configuration values
+const COMPANY_NAME = "TikTok Views Counter"
+const CONTACT_EMAIL = "ilansas94@gmail.com"
+const JURISDICTION = "Israel"
+const RETENTION_MONTHS = 12
+
 export default function TermsPage() {
   return (
     <div className="min-h-screen bg-tiktok-dark">
@@ -10,89 +16,77 @@ export default function TermsPage() {
               ← Back to Home
             </Link>
             <h1 className="text-3xl font-bold mb-4">Terms of Service</h1>
-            <p className="text-gray-400">Last updated: {new Date().toLocaleDateString()}</p>
+            <p className="text-gray-400">Effective date: {new Date().toISOString().slice(0,10)}</p>
           </div>
 
           <div className="prose prose-invert max-w-none">
             <div className="space-y-6 text-gray-300">
               <section>
-                <h2 className="text-xl font-semibold mb-3 text-white">Service Description</h2>
+                <h2 className="text-xl font-semibold mb-3 text-white">Overview</h2>
                 <p>
-                  This site provides aggregated view totals for your TikTok account. You must be the owner of the connected account to use this service.
+                  {COMPANY_NAME} provides a tool to view your total TikTok views and optionally submit your total
+                  to a public leaderboard. These Terms govern your use of the service.
                 </p>
               </section>
 
               <section>
-                <h2 className="text-xl font-semibold mb-3 text-white">Acceptable Use</h2>
+                <h2 className="text-xl font-semibold mb-3 text-white">Eligibility</h2>
+                <p>You must be 13+ and the rightful owner/controller of the TikTok account you connect.</p>
+              </section>
+
+              <section>
+                <h2 className="text-xl font-semibold mb-3 text-white">Permissions and TikTok scopes</h2>
                 <p>
-                  You agree not to misuse the service or attempt to scrape or reverse engineer TikTok. You must use the service in compliance with TikTok&apos;s Terms of Service and our own policies.
+                  By authorizing via TikTok, you allow us to access the scopes you approve (user.info.basic, user.info.profile,
+                  video.list) solely to provide the features described in the app.
                 </p>
               </section>
 
               <section>
-                <h2 className="text-xl font-semibold mb-3 text-white">Account Ownership</h2>
+                <h2 className="text-xl font-semibold mb-3 text-white">User content &amp; license</h2>
                 <p>
-                  You must be the legitimate owner of the TikTok account you connect to this service. You are responsible for maintaining the security of your account credentials.
+                  You grant us a limited, revocable license to display your public TikTok profile (name, avatar) and your total
+                  views in the app and on the leaderboard. You can withdraw by removing access or deleting your entry.
                 </p>
               </section>
 
               <section>
-                <h2 className="text-xl font-semibold mb-3 text-white">Data Usage</h2>
+                <h2 className="text-xl font-semibold mb-3 text-white">Prohibited uses</h2>
+                <ul className="list-disc list-inside ml-4 mt-2 space-y-1">
+                  <li>No scraping, reverse engineering, or bypassing TikTok security.</li>
+                  <li>No misuse of tokens or data; only use the service as intended.</li>
+                </ul>
+              </section>
+
+              <section>
+                <h2 className="text-xl font-semibold mb-3 text-white">Data deletion</h2>
                 <p>
-                  We only access the data necessary to calculate your total view count. We do not store your personal data or access tokens on our servers. All processing happens in memory and is discarded after each request.
+                  You may remove your leaderboard entry at any time in the app, or email {CONTACT_EMAIL}. We will process
+                  deletion within 7 days.
                 </p>
               </section>
 
               <section>
-                <h2 className="text-xl font-semibold mb-3 text-white">Service Availability</h2>
+                <h2 className="text-xl font-semibold mb-3 text-white">Availability &amp; changes</h2>
+                <p>We may update, suspend, or discontinue the service at any time.</p>
+              </section>
+
+              <section>
+                <h2 className="text-xl font-semibold mb-3 text-white">Disclaimers &amp; liability</h2>
                 <p>
-                  The service is provided &quot;as is&quot; without warranties of any kind. We do not guarantee uninterrupted access to the service or accurate results.
+                  The service is provided "as is" without warranties. To the extent permitted by law, our liability is limited
+                  to direct damages and capped at the greater of USD $50 or the amount you paid us in the last 12 months.
                 </p>
               </section>
 
               <section>
-                <h2 className="text-xl font-semibold mb-3 text-white">Limitation of Liability</h2>
-                <p>
-                  Our liability is limited to the maximum extent permitted by law. We are not responsible for any damages arising from the use of this service.
-                </p>
-              </section>
-
-              <section>
-                <h2 className="text-xl font-semibold mb-3 text-white">Third-Party Services</h2>
-                <p>
-                  This service integrates with TikTok&apos;s API. Your use of this service is also subject to TikTok&apos;s Terms of Service and Privacy Policy.
-                </p>
-              </section>
-
-              <section>
-                <h2 className="text-xl font-semibold mb-3 text-white">Termination</h2>
-                <p>
-                  We reserve the right to terminate or suspend access to the service at any time, with or without cause. You may also terminate your use of the service by revoking access to your TikTok account.
-                </p>
-              </section>
-
-              <section>
-                <h2 className="text-xl font-semibold mb-3 text-white">Changes to Terms</h2>
-                <p>
-                  We may update these terms from time to time. Continued use of the service after changes constitutes acceptance of the new terms.
-                </p>
+                <h2 className="text-xl font-semibold mb-3 text-white">Governing law</h2>
+                <p>These Terms are governed by the laws of {JURISDICTION}, unless mandatory law says otherwise.</p>
               </section>
 
               <section>
                 <h2 className="text-xl font-semibold mb-3 text-white">Contact</h2>
-                <p>
-                  For questions about these terms, please contact us at:{' '}
-                  <a href="mailto:ilansas94@gmail.com" className="text-tiktok-primary hover:underline">
-                    ilansas94@gmail.com
-                  </a>
-                </p>
-              </section>
-
-              <section>
-                <h2 className="text-xl font-semibold mb-3 text-white">Governing Law</h2>
-                <p>
-                  These terms are governed by the laws of the jurisdiction in which this service operates. Any disputes will be resolved in the appropriate courts of that jurisdiction.
-                </p>
+                <p>Contact us at <a href={`mailto:${CONTACT_EMAIL}`} className="text-tiktok-primary hover:underline">{CONTACT_EMAIL}</a>.</p>
               </section>
             </div>
           </div>

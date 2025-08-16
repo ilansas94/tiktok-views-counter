@@ -35,6 +35,8 @@ function AuthenticatedViewsCard() {
   const [statusInfo, setStatusInfo] = useState<any>(null)
   const [userInfo, setUserInfo] = useState<any>(null)
   const [isAuthLoading, setIsAuthLoading] = useState(true)
+  const [isOnLeaderboard, setIsOnLeaderboard] = useState(false)
+  const [isCheckingLeaderboardStatus, setIsCheckingLeaderboardStatus] = useState(false)
   const [toast, setToast] = useState<{ message: string; type: 'success' | 'error'; isVisible: boolean }>({
     message: '',
     type: 'success',
@@ -123,6 +125,72 @@ function AuthenticatedViewsCard() {
     checkAuth()
     loadVideos()
   }, [])
+
+  // Check if user is on leaderboard
+  const checkLeaderboardStatus = async () => {
+    if (!userInfo?.username) return
+    
+    setIsCheckingLeaderboardStatus(true)
+    try {
+      const response = await fetch('/api/leaderboard/status', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username: userInfo.username })
+      })
+      
+      const data = await response.json()
+      if (data.ok) {
+        setIsOnLeaderboard(data.onLeaderboard)
+      }
+    } catch (error) {
+      console.error('Error checking leaderboard status:', error)
+    } finally {
+      setIsCheckingLeaderboardStatus(false)
+    }
+  }
+
+  // Remove from leaderboard
+  const removeFromLeaderboard = async () => {
+    if (!userInfo?.username) return
+    
+    try {
+      const response = await fetch('/api/leaderboard/remove', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username: userInfo.username })
+      })
+      
+      const data = await response.json()
+      if (data.ok) {
+        setIsOnLeaderboard(false)
+        setToast({
+          message: 'Successfully removed from leaderboard!',
+          type: 'success',
+          isVisible: true
+        })
+      } else {
+        setToast({
+          message: `Unable to remove from leaderboard: ${data.error}`,
+          type: 'error',
+          isVisible: true
+        })
+      }
+    } catch (error) {
+      console.error('Error removing from leaderboard:', error)
+      setToast({
+        message: 'Failed to remove from leaderboard. Please try again.',
+        type: 'error',
+        isVisible: true
+      })
+    }
+  }
+
+  // Check leaderboard status when user info changes
+  useEffect(() => {
+    if (userInfo?.username) {
+      checkLeaderboardStatus()
+    }
+  }, [userInfo?.username])
 
   const handleLogout = async () => {
     try {
@@ -299,62 +367,74 @@ function AuthenticatedViewsCard() {
         
         {!isAuthLoading && (userInfo || videos.length > 0) && (
           <div className="mt-4 space-y-3">
-            <button
-              onClick={async () => {
-                try {
-                  const submissionData = {
-                    username: userInfo?.username || deriveUsernameFromVideos(videos) || 'unknown',
-                    totalViews: totalViews,
-                    displayName: userInfo?.display_name || deriveUsernameFromVideos(videos) || 'TikTok User',
-                    avatarUrl: userInfo?.avatar_url
-                  }
-                  
-                  if (process.env.NODE_ENV === 'development') {
-                    console.log('Submitting to leaderboard:', submissionData)
-                  }
-                  
-                  const response = await fetch('/api/leaderboard/submit', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(submissionData)
-                  })
-                  
-                  const data = await response.json()
-                  if (data.ok) {
-                    const message = data.rank 
-                      ? `Congratulations! You're now ranked #${data.rank.rank} on the leaderboard!`
-                      : 'Score submitted successfully!'
+            {!isOnLeaderboard ? (
+              <button
+                onClick={async () => {
+                  try {
+                    const submissionData = {
+                      username: userInfo?.username || deriveUsernameFromVideos(videos) || 'unknown',
+                      totalViews: totalViews,
+                      displayName: userInfo?.display_name || deriveUsernameFromVideos(videos) || 'TikTok User',
+                      avatarUrl: userInfo?.avatar_url
+                    }
                     
-                    setToast({
-                      message: message,
-                      type: 'success',
-                      isVisible: true
+                    if (process.env.NODE_ENV === 'development') {
+                      console.log('Submitting to leaderboard:', submissionData)
+                    }
+                    
+                    const response = await fetch('/api/leaderboard/submit', {
+                      method: 'POST',
+                      headers: { 'Content-Type': 'application/json' },
+                      body: JSON.stringify(submissionData)
                     })
-                    // Refresh the page after 6 seconds to show updated leaderboard
-                    setTimeout(() => {
-                      window.location.reload()
-                    }, 6000)
-                  } else {
+                    
+                    const data = await response.json()
+                    if (data.ok) {
+                      const message = data.rank 
+                        ? `Congratulations! You're now ranked #${data.rank.rank} on the leaderboard!`
+                        : 'Score submitted successfully!'
+                      
+                      setToast({
+                        message: message,
+                        type: 'success',
+                        isVisible: true
+                      })
+                      // Update leaderboard status
+                      setIsOnLeaderboard(true)
+                      // Refresh the page after 6 seconds to show updated leaderboard
+                      setTimeout(() => {
+                        window.location.reload()
+                      }, 6000)
+                    } else {
+                      setToast({
+                        message: `Unable to submit to leaderboard: ${data.error}`,
+                        type: 'error',
+                        isVisible: true
+                      })
+                    }
+                  } catch (error) {
+                    console.error('Error submitting to leaderboard:', error)
                     setToast({
-                      message: `Unable to submit to leaderboard: ${data.error}`,
+                      message: 'Failed to submit to leaderboard. Please try again.',
                       type: 'error',
                       isVisible: true
                     })
                   }
-                } catch (error) {
-                  console.error('Error submitting to leaderboard:', error)
-                  setToast({
-                    message: 'Failed to submit to leaderboard. Please try again.',
-                    type: 'error',
-                    isVisible: true
-                  })
-                }
-              }}
-              className="btn-primary w-full block"
-              disabled={totalViews === 0}
-            >
-              {totalViews === 0 ? 'Submit to Leaderboard' : 'Submit/Update Leaderboard Score'}
-            </button>
+                }}
+                className="btn-primary w-full block"
+                disabled={totalViews === 0}
+              >
+                {totalViews === 0 ? 'Submit to Leaderboard' : 'Submit/Update Leaderboard Score'}
+              </button>
+            ) : (
+              <button
+                onClick={removeFromLeaderboard}
+                className="btn-secondary w-full block"
+                disabled={isCheckingLeaderboardStatus}
+              >
+                {isCheckingLeaderboardStatus ? 'Checking...' : 'Remove from Leaderboard'}
+              </button>
+            )}
             <button
               onClick={handleLogout}
               className="btn-secondary w-full block"

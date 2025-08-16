@@ -79,3 +79,10 @@ export async function throttleSubmit(username: string) {
     return false;
   }
 }
+
+// Check if user is on the leaderboard
+export async function isOnLeaderboard(username: string): Promise<boolean> {
+  if (!username) return false;
+  const score = await kv.zscore(ZSET_KEY, username);
+  return score !== null;
+}
