@@ -23,10 +23,7 @@ export default function TermsPage() {
             <div className="space-y-6 text-gray-300">
               <section>
                 <h2 className="text-xl font-semibold mb-3 text-white">Overview</h2>
-                <p>
-                  {COMPANY_NAME} provides a tool to view your total TikTok views and optionally submit your total
-                  to a public leaderboard. These Terms govern your use of the service.
-                </p>
+                <p>{COMPANY_NAME} provides a tool to view your total TikTok views and optionally submit your total to a public leaderboard. These Terms govern your use of the service.</p>
               </section>
 
               <section>
@@ -35,23 +32,22 @@ export default function TermsPage() {
               </section>
 
               <section>
-                <h2 className="text-xl font-semibold mb-3 text-white">Permissions and TikTok scopes</h2>
-                <p>
-                  By authorizing via TikTok, you allow us to access the scopes you approve (user.info.basic, user.info.profile,
-                  video.list) solely to provide the features described in the app.
-                </p>
+                <h2 className="text-xl font-semibold mb-3 text-white">Permissions and TikTok Scopes</h2>
+                <p>By authorizing via TikTok, you allow us to access the scopes you approve (user.info.basic, user.info.profile, video.list) solely to provide the features described in the app.</p>
               </section>
 
               <section>
-                <h2 className="text-xl font-semibold mb-3 text-white">User content &amp; license</h2>
-                <p>
-                  You grant us a limited, revocable license to display your public TikTok profile (name, avatar) and your total
-                  views in the app and on the leaderboard. You can withdraw by removing access or deleting your entry.
-                </p>
+                <h2 className="text-xl font-semibold mb-3 text-white">User Content &amp; License</h2>
+                <p>You grant us a limited, revocable license to display your public TikTok profile (name, avatar) and your total views in the app and on the leaderboard. You can withdraw by removing access or deleting your entry.</p>
               </section>
 
               <section>
-                <h2 className="text-xl font-semibold mb-3 text-white">Prohibited uses</h2>
+                <h2 className="text-xl font-semibold mb-3 text-white">Data &amp; Deletion</h2>
+                <p>Leaderboard entries are stored in Vercel KV (Upstash Redis). You may remove your entry at any time in the app, or by emailing {CONTACT_EMAIL}. We process deletion within 7 days.</p>
+              </section>
+
+              <section>
+                <h2 className="text-xl font-semibold mb-3 text-white">Prohibited Uses</h2>
                 <ul className="list-disc list-inside ml-4 mt-2 space-y-1">
                   <li>No scraping, reverse engineering, or bypassing TikTok security.</li>
                   <li>No misuse of tokens or data; only use the service as intended.</li>
@@ -59,28 +55,17 @@ export default function TermsPage() {
               </section>
 
               <section>
-                <h2 className="text-xl font-semibold mb-3 text-white">Data deletion</h2>
-                <p>
-                  You may remove your leaderboard entry at any time in the app, or email {CONTACT_EMAIL}. We will process
-                  deletion within 7 days.
-                </p>
-              </section>
-
-              <section>
-                <h2 className="text-xl font-semibold mb-3 text-white">Availability &amp; changes</h2>
+                <h2 className="text-xl font-semibold mb-3 text-white">Availability &amp; Changes</h2>
                 <p>We may update, suspend, or discontinue the service at any time.</p>
               </section>
 
               <section>
-                <h2 className="text-xl font-semibold mb-3 text-white">Disclaimers &amp; liability</h2>
-                <p>
-                  The service is provided &quot;as is&quot; without warranties. To the extent permitted by law, our liability is limited
-                  to direct damages and capped at the greater of USD $50 or the amount you paid us in the last 12 months.
-                </p>
+                <h2 className="text-xl font-semibold mb-3 text-white">Disclaimers &amp; Liability</h2>
+                <p>The service is provided &quot;as is&quot; without warranties. To the extent permitted by law, our liability is limited to direct damages and capped at the greater of USD $50 or the amount you paid us in the last 12 months.</p>
               </section>
 
               <section>
-                <h2 className="text-xl font-semibold mb-3 text-white">Governing law</h2>
+                <h2 className="text-xl font-semibold mb-3 text-white">Governing Law</h2>
                 <p>These Terms are governed by the laws of {JURISDICTION}, unless mandatory law says otherwise.</p>
               </section>
 
