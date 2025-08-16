@@ -511,7 +511,7 @@ export default function Home() {
                 <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-16 animate-slide-up">
                   <LoginButton />
                   <span className="text-gray-400 text-sm">
-                    Free • No data stored • Secure OAuth
+                    Free • EU data storage • Secure OAuth
                   </span>
                 </div>
               </>

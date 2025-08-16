@@ -9,7 +9,7 @@ A modern web application that allows TikTok creators to view the total number of
 - **Total Views Calculation**: Sum up views across all your videos
 - **Modern UI**: Dark theme with TikTok brand colors
 - **Responsive Design**: Works on desktop and mobile
-- **Privacy-First**: Secure HTTP-only cookies, no data stored on servers
+- **Privacy-First**: Secure HTTP-only cookies, EU data storage with 12-month retention
 - **Sandbox Support**: Works with TikTok Sandbox tester accounts
 
 ## 🛠️ Tech Stack
