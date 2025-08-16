@@ -168,6 +168,10 @@ function AuthenticatedViewsCard() {
           type: 'success',
           isVisible: true
         })
+        // Refresh the page after 2 seconds to show updated leaderboard
+        setTimeout(() => {
+          window.location.reload()
+        }, 2000)
       } else {
         setToast({
           message: `Unable to remove from leaderboard: ${data.error}`,
