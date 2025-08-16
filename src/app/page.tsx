@@ -304,25 +304,26 @@ function AuthenticatedViewsCard() {
                 try {
                   const submissionData = {
                     username: userInfo?.username || deriveUsernameFromVideos(videos) || 'unknown',
-                    display_name: userInfo?.display_name || deriveUsernameFromVideos(videos) || 'TikTok User',
-                    total_views: totalViews,
-                    video_count: videoCount,
-                    avatar_url: userInfo?.avatar_url
+                    totalViews: totalViews,
+                    displayName: userInfo?.display_name || deriveUsernameFromVideos(videos) || 'TikTok User',
+                    avatarUrl: userInfo?.avatar_url
                   }
                   
-                  console.log('Submitting to leaderboard:', submissionData)
+                  if (process.env.NODE_ENV === 'development') {
+                    console.log('Submitting to leaderboard:', submissionData)
+                  }
                   
-                  const response = await fetch('/api/leaderboard', {
+                  const response = await fetch('/api/leaderboard/submit', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(submissionData)
                   })
                   
                   const data = await response.json()
-                  if (data.success) {
-                    const message = data.is_update 
-                      ? `Score updated! You're now ranked #${data.user_rank} on the leaderboard!`
-                      : `Congratulations! You're now ranked #${data.user_rank} on the leaderboard!`
+                  if (data.ok) {
+                    const message = data.rank 
+                      ? `Congratulations! You're now ranked #${data.rank.rank} on the leaderboard!`
+                      : 'Score submitted successfully!'
                     
                     setToast({
                       message: message,

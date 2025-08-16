@@ -4,13 +4,10 @@ import { useState, useEffect } from 'react'
 import Link from 'next/link'
 
 interface LeaderboardEntry {
-  rank: number
   username: string
-  display_name: string
-  total_views: number
-  video_count: number
-  avatar_url?: string
-  submitted_at: string
+  totalViews: number
+  displayName?: string
+  avatarUrl?: string
 }
 
 interface LeaderboardProps {
@@ -33,13 +30,13 @@ export function Leaderboard({ currentUser }: LeaderboardProps) {
   const fetchLeaderboard = async () => {
     try {
       setIsLoading(true)
-      const response = await fetch('/api/leaderboard')
+      const response = await fetch('/api/leaderboard/top')
       const data = await response.json()
       
-      if (data.success) {
-        setLeaderboardData(data.data)
+      if (data.ok) {
+        setLeaderboardData(data.rows)
       } else {
-        setError(data.error || 'Failed to fetch leaderboard')
+        setError('Failed to fetch leaderboard')
       }
     } catch (err) {
       setError('Failed to load leaderboard')
@@ -129,7 +126,7 @@ export function Leaderboard({ currentUser }: LeaderboardProps) {
          </div>
       ) : (
         <div className="space-y-3">
-          {leaderboardData.map((entry) => (
+          {leaderboardData.map((entry, index) => (
             <div 
               key={entry.username}
               className="flex items-center p-4 bg-gray-800/50 rounded-lg border border-gray-700/50 hover:border-tiktok-primary/30 transition-colors"
@@ -137,47 +134,43 @@ export function Leaderboard({ currentUser }: LeaderboardProps) {
               {/* Rank */}
               <div className="w-12 h-12 flex items-center justify-center mr-4">
                 <span className="text-lg font-bold">
-                  {getRankIcon(entry.rank)}
+                  {getRankIcon(index + 1)}
                 </span>
               </div>
 
               {/* Avatar */}
               <div className="w-12 h-12 rounded-full border-2 border-tiktok-primary overflow-hidden bg-gray-700 flex items-center justify-center mr-4">
-                {entry.avatar_url ? (
+                {entry.avatarUrl ? (
                   <img 
-                    src={`/api/avatar?url=${encodeURIComponent(entry.avatar_url)}`}
-                    alt={entry.display_name}
+                    src={`/api/avatar?url=${encodeURIComponent(entry.avatarUrl)}`}
+                    alt={entry.displayName || entry.username}
                     className="w-full h-full object-cover"
                     onError={(e) => {
                       const target = e.target as HTMLImageElement;
                       target.style.display = 'none';
                       const parent = target.parentElement;
                       if (parent) {
-                        parent.innerHTML = `<div class="text-white font-bold text-lg">${entry.display_name?.charAt(0) || 'U'}</div>`;
+                        parent.innerHTML = `<div class="text-white font-bold text-lg">${entry.displayName?.charAt(0) || entry.username.charAt(0) || 'U'}</div>`;
                       }
                     }}
                   />
                 ) : (
                   <div className="text-white font-bold text-lg">
-                    {entry.display_name?.charAt(0) || 'U'}
+                    {entry.displayName?.charAt(0) || entry.username.charAt(0) || 'U'}
                   </div>
                 )}
               </div>
 
               {/* User Info */}
               <div className="flex-1">
-                <div className="font-semibold text-white">{entry.display_name}</div>
+                <div className="font-semibold text-white">{entry.displayName || entry.username}</div>
                 <div className="text-sm text-gray-400">@{entry.username}</div>
-                <div className="text-xs text-gray-500">
-                  {entry.video_count} video{entry.video_count !== 1 ? 's' : ''} • 
-                  Submitted {new Date(entry.submitted_at).toLocaleDateString()}
-                </div>
               </div>
 
               {/* Views */}
               <div className="text-right">
                 <div className="text-2xl font-bold gradient-text">
-                  {formatViews(entry.total_views)}
+                  {formatViews(entry.totalViews)}
                 </div>
                 <div className="text-sm text-gray-400">total views</div>
               </div>
