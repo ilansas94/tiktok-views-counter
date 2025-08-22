@@ -142,7 +142,7 @@ export function Leaderboard({ currentUser }: LeaderboardProps) {
               <div className="w-12 h-12 rounded-full border-2 border-tiktok-primary overflow-hidden bg-gray-700 flex items-center justify-center mr-4">
                 {entry.avatarUrl ? (
                   <img 
-                    src={`/api/avatar?url=${encodeURIComponent(entry.avatarUrl)}`}
+                    src={`/api/avatar?url=${encodeURIComponent(entry.avatarUrl)}&username=${encodeURIComponent(entry.username)}`}
                     alt={entry.displayName || entry.username}
                     className="w-full h-full object-cover"
                     onError={(e) => {
