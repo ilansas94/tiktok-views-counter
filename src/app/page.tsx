@@ -212,6 +212,58 @@ function AuthenticatedViewsCard() {
     }
   }
 
+  // Submit or update score on the leaderboard
+  const submitToLeaderboard = async () => {
+    try {
+      const submissionData = {
+        username: userInfo?.username || deriveUsernameFromVideos(videos) || 'unknown',
+        totalViews: totalViews,
+        displayName: userInfo?.display_name || deriveUsernameFromVideos(videos) || 'User',
+        avatarUrl: userInfo?.avatar_url
+      }
+
+      if (process.env.NODE_ENV === 'development') {
+        console.log('Submitting to leaderboard:', submissionData)
+      }
+
+      const response = await fetch('/api/leaderboard/submit', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(submissionData)
+      })
+
+      const data = await response.json()
+      if (data.ok) {
+        const message = data.rank 
+          ? `Congratulations! You're now ranked #${data.rank.rank} on the leaderboard!`
+          : 'Score submitted successfully!'
+
+        setToast({
+          message: message,
+          type: 'success',
+          isVisible: true
+        })
+        setIsOnLeaderboard(true)
+        setTimeout(() => {
+          window.location.reload()
+        }, 2000)
+      } else {
+        setToast({
+          message: `Unable to submit to leaderboard: ${data.error}`,
+          type: 'error',
+          isVisible: true
+        })
+      }
+    } catch (error) {
+      console.error('Error submitting to leaderboard:', error)
+      setToast({
+        message: 'Failed to submit to leaderboard. Please try again.',
+        type: 'error',
+        isVisible: true
+      })
+    }
+  }
+
   if (isLoading) {
     return (
       <div className="card max-w-md w-full">
@@ -373,71 +425,29 @@ function AuthenticatedViewsCard() {
           <div className="mt-4 space-y-3">
             {!isOnLeaderboard ? (
               <button
-                onClick={async () => {
-                  try {
-                    const submissionData = {
-                      username: userInfo?.username || deriveUsernameFromVideos(videos) || 'unknown',
-                      totalViews: totalViews,
-                      displayName: userInfo?.display_name || deriveUsernameFromVideos(videos) || 'User',
-                      avatarUrl: userInfo?.avatar_url
-                    }
-                    
-                    if (process.env.NODE_ENV === 'development') {
-                      console.log('Submitting to leaderboard:', submissionData)
-                    }
-                    
-                    const response = await fetch('/api/leaderboard/submit', {
-                      method: 'POST',
-                      headers: { 'Content-Type': 'application/json' },
-                      body: JSON.stringify(submissionData)
-                    })
-                    
-                    const data = await response.json()
-                    if (data.ok) {
-                      const message = data.rank 
-                        ? `Congratulations! You're now ranked #${data.rank.rank} on the leaderboard!`
-                        : 'Score submitted successfully!'
-                      
-                      setToast({
-                        message: message,
-                        type: 'success',
-                        isVisible: true
-                      })
-                                             // Update leaderboard status
-                       setIsOnLeaderboard(true)
-                       // Refresh the page after 2 seconds to show updated leaderboard
-                       setTimeout(() => {
-                         window.location.reload()
-                       }, 2000)
-                    } else {
-                      setToast({
-                        message: `Unable to submit to leaderboard: ${data.error}`,
-                        type: 'error',
-                        isVisible: true
-                      })
-                    }
-                  } catch (error) {
-                    console.error('Error submitting to leaderboard:', error)
-                    setToast({
-                      message: 'Failed to submit to leaderboard. Please try again.',
-                      type: 'error',
-                      isVisible: true
-                    })
-                  }
-                }}
+                onClick={submitToLeaderboard}
                 className="btn-primary w-full block"
                 disabled={totalViews === 0}
               >
                 {totalViews === 0 ? 'Submit to Leaderboard' : 'Submit/Update Leaderboard Score'}
               </button>
             ) : (
-              <button
-                onClick={removeFromLeaderboard}
-                className="btn-secondary w-full block"
-                disabled={isCheckingLeaderboardStatus}
-              >
-                {isCheckingLeaderboardStatus ? 'Checking...' : 'Remove from Leaderboard'}
-              </button>
+              <>
+                <button
+                  onClick={submitToLeaderboard}
+                  className="btn-primary w-full block"
+                  disabled={totalViews === 0}
+                >
+                  {totalViews === 0 ? 'Update Leaderboard Score' : 'Update Leaderboard Score'}
+                </button>
+                <button
+                  onClick={removeFromLeaderboard}
+                  className="btn-secondary w-full block"
+                  disabled={isCheckingLeaderboardStatus}
+                >
+                  {isCheckingLeaderboardStatus ? 'Checking...' : 'Remove from Leaderboard'}
+                </button>
+              </>
             )}
             <button
               onClick={handleLogout}
