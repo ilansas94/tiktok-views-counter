@@ -326,9 +326,8 @@ function AuthenticatedViewsCard() {
             {totalViews.toLocaleString()}
           </span>
         </div>
-        {process.env.NEXT_PUBLIC_ENABLE_PER_VIDEO === '1' && (
-          <PerVideoBreakdown />
-        )}
+        {/* Render unconditionally; component hides itself via runtime flag */}
+        <PerVideoBreakdown />
 
         <div className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium mb-4 bg-green-500/20 text-green-400 border border-green-500/30">
           <svg className="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">

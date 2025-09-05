@@ -47,7 +47,8 @@ function fmt(n?: number) {
 }
 
 export function PerVideoBreakdown() {
-  const enabled = process.env.NEXT_PUBLIC_ENABLE_PER_VIDEO === '1'
+  // Runtime flag (no rebuilds needed)
+  const [enabled, setEnabled] = useState<boolean | null>(null)
   const [open, setOpen] = useState(false)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string>('')
@@ -55,6 +56,23 @@ export function PerVideoBreakdown() {
   const [cursor, setCursor] = useState<number>(0)
   const [hasMore, setHasMore] = useState<boolean>(false)
   const [loadedOnce, setLoadedOnce] = useState(false)
+
+  // Fetch flag once on mount
+  useEffect(() => {
+    let alive = true
+    ;(async () => {
+      try {
+        const r = await fetch('/api/flags/per-video', { cache: 'no-store' })
+        const j = await r.json().catch(() => ({}))
+        if (!alive) return
+        setEnabled(!!j.enabled)
+      } catch {
+        if (!alive) return
+        setEnabled(false)
+      }
+    })()
+    return () => { alive = false }
+  }, [])
 
   useEffect(() => {
     if (!enabled || !open || loadedOnce) return
@@ -90,6 +108,8 @@ export function PerVideoBreakdown() {
     }
   }
 
+  // While flag is loading, render nothing to avoid flicker
+  if (enabled === null) return null
   if (!enabled) return null
 
   return (
@@ -162,4 +182,3 @@ export function PerVideoBreakdown() {
     </div>
   )
 }
-
