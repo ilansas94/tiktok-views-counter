@@ -6,6 +6,7 @@ import Footer from '@/components/Footer'
 
 const inter = Inter({ subsets: ['latin'] })
 const siteUrl = process.env.NEXT_PUBLIC_APP_BASE_URL || 'https://tiktok-views-counter.vercel.app'
+const ogImageUrl = `${siteUrl}/og-image.png?v=2`
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
@@ -21,7 +22,7 @@ export const metadata: Metadata = {
     type: 'website',
     images: [
       {
-        url: '/og-image.png',
+        url: ogImageUrl,
         width: 1200,
         height: 630,
         alt: 'TotalViews',
@@ -32,7 +33,7 @@ export const metadata: Metadata = {
     card: 'summary_large_image',
     title: 'TotalViews',
     description: 'Tool for creators to log in and see total views across all their videos (sample until API approval).',
-    images: ['/og-image.png'],
+    images: [ogImageUrl],
   },
   icons: {
     icon: [{ url: '/favicon.ico' }],
