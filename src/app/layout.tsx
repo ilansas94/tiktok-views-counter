@@ -11,6 +11,7 @@ export const metadata: Metadata = {
   description: 'Tool for creators to log in and see total views across all their videos (sample until API approval).',
   keywords: ['TikTok', 'views', 'counter', 'creator', 'analytics'],
   authors: [{ name: 'TotalViews' }],
+  manifest: '/manifest.json',
   openGraph: {
     title: 'TotalViews',
     description: 'Tool for creators to log in and see total views across all their videos (sample until API approval).',
@@ -31,8 +32,8 @@ export const metadata: Metadata = {
     images: ['/logo.svg'],
   },
   icons: {
-    icon: '/logo.svg',
-    apple: '/logo.svg',
+    icon: [{ url: '/favicon.ico' }],
+    apple: [{ url: '/apple-touch-icon.png', sizes: '180x180', type: 'image/png' }],
   },
 }
 
@@ -43,6 +44,11 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
+      <head>
+        <link rel="manifest" href="/manifest.json" />
+        <link rel="apple-touch-icon" href="/apple-touch-icon.png" sizes="180x180" type="image/png" />
+        <link rel="icon" href="/favicon.ico" sizes="any" type="image/x-icon" />
+      </head>
       <body className={inter.className}>
         <div className="min-h-screen flex flex-col">
           <Header />
