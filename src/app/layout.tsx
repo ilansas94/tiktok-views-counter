@@ -6,7 +6,7 @@ import Footer from '@/components/Footer'
 
 const inter = Inter({ subsets: ['latin'] })
 const siteUrl = process.env.NEXT_PUBLIC_APP_BASE_URL || 'https://tiktok-views-counter.vercel.app'
-const ogImageUrl = `${siteUrl}/og-image.png?v=3`
+const ogImageUrl = `${siteUrl}/og-image.png?v=4`
 const metaTitle = 'TotalViews'
 const metaDescription = 'Tool for creators to log in and see total views across all their videos (sample until API approval).'
 
