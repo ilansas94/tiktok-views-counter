@@ -5,8 +5,10 @@ import Header from '@/components/Header'
 import Footer from '@/components/Footer'
 
 const inter = Inter({ subsets: ['latin'] })
+const siteUrl = process.env.NEXT_PUBLIC_APP_BASE_URL || 'https://tiktok-views-counter.vercel.app'
 
 export const metadata: Metadata = {
+  metadataBase: new URL(siteUrl),
   title: 'TotalViews',
   description: 'Tool for creators to log in and see total views across all their videos (sample until API approval).',
   keywords: ['TikTok', 'views', 'counter', 'creator', 'analytics'],
@@ -15,10 +17,11 @@ export const metadata: Metadata = {
   openGraph: {
     title: 'TotalViews',
     description: 'Tool for creators to log in and see total views across all their videos (sample until API approval).',
+    url: siteUrl,
     type: 'website',
     images: [
       {
-        url: '/logo.svg',
+        url: '/og-image.png',
         width: 1200,
         height: 630,
         alt: 'TotalViews',
@@ -29,7 +32,7 @@ export const metadata: Metadata = {
     card: 'summary_large_image',
     title: 'TotalViews',
     description: 'Tool for creators to log in and see total views across all their videos (sample until API approval).',
-    images: ['/logo.svg'],
+    images: ['/og-image.png'],
   },
   icons: {
     icon: [{ url: '/favicon.ico' }],
